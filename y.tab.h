@@ -166,11 +166,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 27 "parser.y"
+#line 28 "parser.y"
 
 
     struct {
-        ARGS *lista;
+        struct args *lista;
         int num;
     } lista;
 
@@ -180,7 +180,7 @@ union YYSTYPE
     } tipo;
 
     struct {
-        bool code_est;
+        int code_est;
         char dir[50];
         int type;
         int base;
@@ -192,10 +192,10 @@ union YYSTYPE
     } base;
 
     struct {
-        LINDEX *truelist;
-        LINDEX *falselist;
-        LINDEX *nexlist;
-        LINDEX *prueba;
+        struct list_index *truelist;
+        struct list_index *falselist;
+        struct list_index *nexlist;
+        struct list_index *prueba;
     } lista_indices;
 
 #line 202 "y.tab.h"

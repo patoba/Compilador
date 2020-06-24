@@ -14,11 +14,12 @@
 extern int yylex();
 extern int yylineno;
 extern char* yytext;
+void yyerror(char *s);
 void error(char *s);
 
 //variables globales
-TSTACK *STS;
-SSTACK *STT;
+TSTACK *STT;
+SSTACK *STS;
 int dir;
 int typeGBL;
 //vector<int> SDir;
@@ -27,7 +28,7 @@ int typeGBL;
 %union {
 
     struct {
-        ARGS *lista;
+        struct args *lista;
         int num;
     } lista;
 
@@ -37,7 +38,7 @@ int typeGBL;
     } tipo;
 
     struct {
-        bool code_est;
+        int code_est;
         char dir[50];
         int type;
         int base;
@@ -49,10 +50,10 @@ int typeGBL;
     } base;
 
     struct {
-        LINDEX *truelist;
-        LINDEX *falselist;
-        LINDEX *nexlist;
-        LINDEX *prueba;
+        struct list_index *truelist;
+        struct list_index *falselist;
+        struct list_index *nexlist;
+        struct list_index *prueba;
     } lista_indices;
 }
 
@@ -136,7 +137,7 @@ base: ENT{}
 //creacion de tipo es posible que este mal
 tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA{} tipo_arreglo{
                                                     }
-            | {$$.type=baseGBL};
+            | {};
 
 
 //ID se puede usar asi?
@@ -342,9 +343,5 @@ lista_param: lista_param COMA expresion {
 void error(char *s){
     printf("%s, linea: %d, token: %s\n",s, yylineno, yytext);
     exit(-1);
-}
-
-void gen(string s){
-    codigo = codigo + s + "\n";
 }
 

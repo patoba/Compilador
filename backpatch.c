@@ -6,9 +6,11 @@
 
 INDEX *init_index() {
     static int indices = 0;
+    char final[6];
     INDEX *index = (INDEX*)malloc(sizeof(INDEX));
 
-    index->indice = indices++; // Tenemos un problema
+    sprintf(final, "i%d", indices++);
+    index->indice =  final; // Tenemos un problema
     index->next = NULL;
 
     return index;
@@ -58,8 +60,8 @@ LINDEX *combinar(LINDEX *list1, LINDEX *list2) {
     new_list->head = list1->head;
     new_list->tail = list2->tail;
 
-    free_list_index(list1);
-    free_list_index(list2);
+    finish_list_index(list1);
+    finish_list_index(list2);
 
     return new_list;
 }
@@ -78,4 +80,13 @@ void backpatch(CODE *code, LINDEX *list, char *label) {
         }
         temp_quad = temp_quad->next;
     }
+}
+
+char *new_temporal() {
+    static int temp = 0;
+    char *final = (char *)malloc(sizeof(char) * 6);
+
+    sprintf(final, "t%d", temp++);
+
+    return final;
 }

@@ -84,16 +84,17 @@
 extern int yylex();
 extern int yylineno;
 extern char* yytext;
+void yyerror(char *s);
 void error(char *s);
 
 //variables globales
-TSTACK *STS;
-SSTACK *STT;
+TSTACK *STT;
+SSTACK *STS;
 int dir;
 int typeGBL;
 //vector<int> SDir;
 
-#line 97 "y.tab.c"
+#line 98 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -249,11 +250,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 27 "parser.y"
+#line 28 "parser.y"
 
 
     struct {
-        ARGS *lista;
+        struct args *lista;
         int num;
     } lista;
 
@@ -263,7 +264,7 @@ union YYSTYPE
     } tipo;
 
     struct {
-        bool code_est;
+        int code_est;
         char dir[50];
         int type;
         int base;
@@ -275,13 +276,13 @@ union YYSTYPE
     } base;
 
     struct {
-        LINDEX *truelist;
-        LINDEX *falselist;
-        LINDEX *nexlist;
-        LINDEX *prueba;
+        struct list_index *truelist;
+        struct list_index *falselist;
+        struct list_index *nexlist;
+        struct list_index *prueba;
     } lista_indices;
 
-#line 285 "y.tab.c"
+#line 286 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -739,9 +740,9 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   103,   103,   103,   112,   112,   113,   113,   114,   119,
-     120,   119,   125,   125,   128,   129,   130,   131,   132,   137,
-     137,   139,   145,   147,   156
+       0,   104,   104,   104,   113,   113,   114,   114,   115,   120,
+     121,   120,   126,   126,   129,   130,   131,   132,   133,   138,
+     138,   140,   146,   148,   157
 };
 #endif
 
@@ -1357,147 +1358,147 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 103 "parser.y"
+#line 104 "parser.y"
           { STS = init_sym_tab_stack();
             STT = init_type_tab_stack();
             TYPTAB *global = init_type_tab_global();
             push_tt(STT, global);
             dir = 0;
           }
-#line 1368 "y.tab.c"
+#line 1369 "y.tab.c"
     break;
 
   case 3:
-#line 108 "parser.y"
+#line 109 "parser.y"
                                    {
             //$$.codigo = $3.codigo;
             }
-#line 1376 "y.tab.c"
+#line 1377 "y.tab.c"
     break;
 
   case 4:
-#line 112 "parser.y"
+#line 113 "parser.y"
                    {}
-#line 1382 "y.tab.c"
+#line 1383 "y.tab.c"
     break;
 
   case 6:
-#line 113 "parser.y"
+#line 114 "parser.y"
                              {}
-#line 1388 "y.tab.c"
+#line 1389 "y.tab.c"
     break;
 
   case 8:
-#line 114 "parser.y"
+#line 115 "parser.y"
                {}
-#line 1394 "y.tab.c"
+#line 1395 "y.tab.c"
     break;
 
   case 9:
-#line 119 "parser.y"
+#line 120 "parser.y"
                                 {  
                                    }
-#line 1401 "y.tab.c"
+#line 1402 "y.tab.c"
     break;
 
   case 10:
-#line 120 "parser.y"
+#line 121 "parser.y"
                                                   {
                                                     }
-#line 1408 "y.tab.c"
+#line 1409 "y.tab.c"
     break;
 
   case 11:
-#line 121 "parser.y"
+#line 122 "parser.y"
                                                           {
                                                         
                                                     }
-#line 1416 "y.tab.c"
+#line 1417 "y.tab.c"
     break;
 
   case 12:
-#line 125 "parser.y"
+#line 126 "parser.y"
           {}
-#line 1422 "y.tab.c"
+#line 1423 "y.tab.c"
     break;
 
   case 13:
-#line 125 "parser.y"
+#line 126 "parser.y"
                          {}
-#line 1428 "y.tab.c"
+#line 1429 "y.tab.c"
     break;
 
   case 14:
-#line 128 "parser.y"
+#line 129 "parser.y"
          {}
-#line 1434 "y.tab.c"
+#line 1435 "y.tab.c"
     break;
 
   case 15:
-#line 129 "parser.y"
+#line 130 "parser.y"
           {}
-#line 1440 "y.tab.c"
+#line 1441 "y.tab.c"
     break;
 
   case 16:
-#line 130 "parser.y"
+#line 131 "parser.y"
            {}
-#line 1446 "y.tab.c"
+#line 1447 "y.tab.c"
     break;
 
   case 17:
-#line 131 "parser.y"
+#line 132 "parser.y"
          {}
-#line 1452 "y.tab.c"
+#line 1453 "y.tab.c"
     break;
 
   case 18:
-#line 132 "parser.y"
+#line 133 "parser.y"
          {}
-#line 1458 "y.tab.c"
+#line 1459 "y.tab.c"
     break;
 
   case 19:
-#line 137 "parser.y"
+#line 138 "parser.y"
                                          {}
-#line 1464 "y.tab.c"
+#line 1465 "y.tab.c"
     break;
 
   case 20:
-#line 137 "parser.y"
+#line 138 "parser.y"
                                                         {
                                                     }
-#line 1471 "y.tab.c"
+#line 1472 "y.tab.c"
     break;
 
   case 21:
-#line 139 "parser.y"
-              {(yyval.tipo).type=baseGBL}
-#line 1477 "y.tab.c"
+#line 140 "parser.y"
+              {}
+#line 1478 "y.tab.c"
     break;
 
   case 22:
-#line 145 "parser.y"
+#line 146 "parser.y"
                              {
                         }
-#line 1484 "y.tab.c"
+#line 1485 "y.tab.c"
     break;
 
   case 23:
-#line 147 "parser.y"
+#line 148 "parser.y"
                  {
             }
-#line 1491 "y.tab.c"
+#line 1492 "y.tab.c"
     break;
 
   case 24:
-#line 156 "parser.y"
+#line 157 "parser.y"
               {}
-#line 1497 "y.tab.c"
+#line 1498 "y.tab.c"
     break;
 
 
-#line 1501 "y.tab.c"
+#line 1502 "y.tab.c"
 
       default: break;
     }
@@ -1691,14 +1692,10 @@ yyreturn:
   return yyresult;
 }
 
-#line 341 "parser.y"
+#line 342 "parser.y"
 
 void error(char *s){
     printf("%s, linea: %d, token: %s\n",s, yylineno, yytext);
     exit(-1);
-}
-
-void gen(string s){
-    codigo = codigo + s + "\n";
 }
 

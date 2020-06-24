@@ -2,14 +2,15 @@
 *Autor: Adrián Ulises Mercado Martı́nez
 *Descripción: Se definen las funciones para manipular una tabla de simbolos
 */
-#ifndef SYMTAB_H
-#define SYMTAB_H
+
 
 #include "data.h"
 
+#pragma once
+
 void append_arg(ARGS* args, int arg);//Agrega un argumento al final
 int compare_args(ARGS *a1, ARGS *a2);//Compara dos listas y devuelve 1 si son iguales, 0 si son diferentes
-void append_sym(SYMTAB *t,SYM *s) ; //Agrega al final de la tabla un nuevo simbolo
+int append_sym(SYMTAB *t,SYM *s) ; //Agrega al final de la tabla un nuevo simbolo
 //void clear_sym_tab(SYMTAB *t) ; // Deja vacia la tabla
 
 SYMTAB *pop_st(SSTACK *s) ; // Ejecuta un pop sobre la pila de tablas de simbolos
@@ -40,4 +41,3 @@ SYM *search_Prev_SYM(SYMTAB *T, char *id);
 SYM *search_SYM(SYMTAB *T, char *id);
 SYM *set_sym(SYM *s, char *id, int dir, int tipo, char *var, ARGS *args, SYMTAB *ts, TYPTAB *tt);
 SYMTAB *getTopSym(SSTACK *pilaTS);
-#endif

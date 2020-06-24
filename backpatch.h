@@ -3,15 +3,17 @@
 
 #include "cuadruplas.h"
 
-typedef struct index {
+typedef struct index INDEX;
+
+struct index {
     char *indice;
     INDEX *next;
-} INDEX;
+};
 
 typedef struct list_index {
     INDEX *head;
     INDEX *tail;
-} LINDEX;
+}LINDEX;
 
 INDEX *init_index(); // Reserva memoria para un nodo índice
 void finish_index(INDEX *index); // Libera memoria de un nodo índice
@@ -24,5 +26,7 @@ void append_index(LINDEX *list, INDEX *index); // Agrega un nodo índice al fina
 LINDEX *combinar(LINDEX *list1, LINDEX *list2); // Retorna una lista ligada de la concateción de l1 y l2
 
 void backpatch(CODE *code, LINDEX *list, char *label); // Remplaza label en cada aparición de un índice en la cuádruplas del código C
+
+char *new_temporal();
 
 #endif
