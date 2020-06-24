@@ -10,7 +10,7 @@
  * Retorna la nueva dirección generada por la ampliación
  * o la dirección original en caso de que no se realice
  */
-char *ampliar (char *dir, int t1, int t2, CODE *c);
+char *ampliar (char *dir, int t1, int t2, CODE *code);
 
 /*
  * Recibe dos tipos, cada uno es su índice hacia la tabla de tipos en la cima de la pila
@@ -19,7 +19,7 @@ char *ampliar (char *dir, int t1, int t2, CODE *c);
  * Retorna la nueva dirección generada por la reducción
  * o la dirección original en caso de que no se realice
  */
-char *reducir(char *dir, int t1, int t2, CODE *c);
+char *reducir(char *dir, int t1, int t2, CODE *code);
 
 /*
  * Recibe dos tipos, cada uno es índice hacia la tabla de tipos en la cima de la pila
