@@ -14,14 +14,18 @@ struct cuad{
 typedef struct code{
 	CUAD *head;
 	CUAD *tail;
-}CODE;
+} CODE;
 
 CUAD *init_quad(); // Reserva memoria para una cuádrupla
-void finish_quad(CUAD *c); // Libera la memoria de una cuádrupla
+void add_data_quad(CUAD *quad, char *op, char *arg1, char *arg2, char *res); // Llena el quad
+void finish_quad(CUAD *quad); // Libera la memoria de una cuádrupla
 
 CODE *init_code(); // Reserva memoria para el código
-void finish_code(CODE *c); // Libera la memoria de la lista ligada del código
+void finish_code(CODE *code); // Libera la memoria de la lista ligada del código
 
-void append_quad(CODE* c, CUAD *cd); // Agrega una cuádrupla al final de la lista
+void append_quad(CODE* code, CUAD *quad); // Agrega una cuádrupla al final de la lista
+
+void print_code(CODE *code);
+void print_content_code(CUAD *code);
 
 #endif
