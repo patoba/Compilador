@@ -17,7 +17,7 @@ extern TSTACK *STT;
 char *ampliar (char *dir, int t1, int t2, CODE *code) {
     int tipo_min = min(t1, t2);
     
-    if (t1 == t2 || t2 == tipo_min || tipos_min == -1) return dir;
+    if (t1 == t2 || t2 == tipo_min || tipo_min == -1) return dir;
     else {
         TYPTAB *top = getTopType(STT);
         TYP *tipo = search_type(top, tipo_min);
