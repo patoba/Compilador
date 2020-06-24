@@ -1,5 +1,7 @@
 #include "data.h"
 
+#pragma once
+
 int append_type(TYPTAB *tt,TYP *t); //*Agrega a l final de la tabla un nuevo tipo
 void clear_type_tab(TYPTAB *tt); //*Deja vacia la tabla
 
