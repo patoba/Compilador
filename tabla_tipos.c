@@ -57,6 +57,7 @@ void push_tt(TSTACK *s, TYPTAB *tt){
     if(s->top == NULL && s->tail == NULL){
         s -> top = tt;
         s->tail = tt;
+        return;
     }
     TYPTAB *temp = (*s).top;
     while((*temp).next != NULL){
@@ -205,6 +206,7 @@ void print_tab_type(TYPTAB *tt ){
         print_type(temp);
         temp = (*temp).next;
     }
+    print_type(temp);
         
 }
 
@@ -216,5 +218,6 @@ void print_stack_tab_type(TSTACK *s ){
         print_tab_type(temp);
         temp = (*temp).next;
     }
+    print_tab_type(temp);
 }
 
