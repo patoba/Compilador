@@ -5,7 +5,8 @@
 
     #include "y.tab.h"
 
-    extern void error(char *);
+    extern void yyerror(char *);
+
 %}
 
 %option yylineno
@@ -175,7 +176,7 @@ cadena "\""[c\c]*"\""
 }
 <INITIAL>[ \t\n\r]+ {/*Ignora espacios en blaco*/}
 <INITIAL>"/*"       {BEGIN(COMENTARIO);}
-<INITIAL>.          {error(yytext);}
+<INITIAL>.          {yyerror(yytext);}
 <COMENTARIO>[^*/]*  {/*Ignorar comentarios*/}
 <COMENTARIO>[*/]    {/*Ignorar comentarios*/}
 <COMENTARIO>"*/"    {BEGIN(INITIAL);}

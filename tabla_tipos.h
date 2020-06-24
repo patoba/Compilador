@@ -26,11 +26,12 @@ void finish_type(TYP *s); //*libera memoria para un tipo
 int getTam(TYPTAB *t , int id);//*Retorna el tam de un tipo
 TB *getTipoBase(TYPTAB *t , int id); //*retorna el tipo base
 char *getNombre( TYPTAB *t , int id ) ; //*retorna el nombre de un tipo tambien lo puede cambiar por un entero
+int getId(TYPTAB *tt, char* nombre); //regresa el id dado el nombre
 
 TYPTAB *getTopType(TSTACK *pilaTT);//Retorna el tope de la pila de tipos
 TYPTAB *getGlobal(TSTACK *pilaTT);//Retorna la tabla de tipos global
 
-TYP *crear_typ(char *nombre, int tam, TB *tb);
+TYP *crear_type(char *nombre, int tam, TB *tb);
 
 void print_tipo_base(TB *tb);//imprime un tipo base 
 void print_type(TYP *t );//Imprime un tipo

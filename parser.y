@@ -15,13 +15,12 @@ extern int yylex();
 extern int yylineno;
 extern char* yytext;
 void yyerror(char *s);
-void error(char *s);
 
 //variables globales
 TSTACK *STT;
 SSTACK *STS;
 int dir;
-int typeGBL;
+int typeGBL, baseGBL;
 //vector<int> SDir;
 %}
 
@@ -107,11 +106,12 @@ programa: { STS = init_sym_tab_stack();
             push_tt(STT, global);
             dir = 0;
           } declaraciones funciones{
-            //$$.codigo = $3.codigo;
-            };
+                                    //$$.codigo = $3.codigo;
+                                    print_stack_tab_type(STT);
+                                    };
 
-declaraciones: tipo{} lista_var PUNTO_Y_COMA declaraciones
-             | tipo_registro {} lista_var PUNTO_Y_COMA declaraciones
+declaraciones: tipo{typeGBL = $1.type;} lista_var PUNTO_Y_COMA declaraciones
+             | tipo_registro {typeGBL= $1.type;} lista_var PUNTO_Y_COMA declaraciones
              | {};
 
 //creacion del tipo revisar
@@ -123,30 +123,63 @@ tipo_registro: ESTRUCTURA INICIO{
                                                         
                                                     };
 
-tipo: base{} tipo_arreglo{};
+tipo: base{baseGBL = $1.base;} tipo_arreglo{$$.type = $3.type;};
 
 //Definir los tipos en global
-base: ENT{}
-    | REAL{}
-    | DREAL{}
-    | CAR{}
-    | SIN{};
+base: ENT{$$.base = getId(getGlobal(STT), "ent");}
+    | REAL{$$.base = getId(getGlobal(STT), "real");}
+    | DREAL{$$.base = getId(getGlobal(STT), "dreal");}
+    | CAR{$$.base = getId(getGlobal(STT), "car");}
+    | SIN{$$.base = getId(getGlobal(STT), "sin");};
 
 //Poner type, dir de num 
 //Poner type de tipo arreglo
 //creacion de tipo es posible que este mal
-tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA{} tipo_arreglo{
-                                                    }
-            | {};
+tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
+                                                        if($2.type == getId(getGlobal(STT), "ent")){
+                                                            int temp_dir = atoi($2.dir);
+                                                            if(temp_dir > 0){ //dir debe ser entero
+                                                                TB* tipo_base = crear_tipo_basado($4.type);
+                                                                TYP *nuevo = crear_type("array", $2.type, tipo_base);
+                                                                append_type(getTopType(STT), nuevo);
+                                                                $$.type = nuevo->id;
+                                                            }else{
+                                                                yyerror("El indice debe ser mayor a cero");
+                                                            }
+                                                        }else{
+                                                            yyerror("El indice debe ser tipo entero\n");
+                                                        }
+                                                      }
+            | {$$.type=baseGBL;};
 
 
 //ID se puede usar asi?
 //tabla simbolos debe tener existe
 //
-lista_var: lista_var COMA ID {
-                        }
+lista_var: lista_var COMA ID {  
+                                char *id = $3.dir;
+                                if(search_SYM(getTopSym(STS), id) == NULL){
+                                    Simbolo s = crear_sym(id, dir, typeGBL, "var", NULL, NULL, NULL);
+                                    append_sym(getTopSym(STS), s);//prueba
+                                    dir = dir + getTam(getGlobal(STT), typeGBL);
+                                }else{
+                                    char s[80] = "Ya existe una variable llamada ";
+                                    strcat(s, id);
+                                    yyerror(s);
+                                }
+                             }
             | ID {
-            };
+                    char *id = $3.dir;
+                    if(search_SYM(getTopSym(STS), id) == NULL){
+                        Simbolo s = crear_sym(id, dir, typeGBL, "var", NULL, NULL, NULL);
+                        append_sym(getTopSym(STS), s);//prueba
+                        dir = dir + getTam(getGlobal(STT), typeGBL);
+                    }else{
+                        char s[80] = "Ya existe una variable llamada ";
+                        strcat(s, id);
+                        yyerror(s);
+                    }
+                 };
 
 //ListaRet no existe
 //sdir no existe
@@ -340,8 +373,7 @@ lista_param: lista_param COMA expresion {
                        };
 
 %%
-void error(char *s){
+void yyerror(char *s){
     printf("%s, linea: %d, token: %s\n",s, yylineno, yytext);
-    exit(-1);
 }
 

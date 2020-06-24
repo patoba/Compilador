@@ -5,6 +5,7 @@
 #include "tipos.h"
 #include "cuadruplas.h"
 #include "tabla_tipos.h"
+#include "backpatch.h"
 extern TSTACK *STT;
 
 /*

@@ -241,11 +241,11 @@ SYM *search_Prev_SYM(SYMTAB *T, char *id){
 
 
 //Checar
-SYM *set_sym(SYM *s, char *id, int dir, int tipo, char *var, ARGS *args, SYMTAB *ts, TYPTAB *tt){
+SYM *crear_sym(char *id, int dir, int tipo, char *var, ARGS *args){
+    SYM *s = init_sym();
     strcpy(s->id,id);
     s->dir = dir;
     s->tipo = tipo;
-    ts->tt_asoc = tt;
     if (var != NULL )
         strcpy(s->var, var);
     else

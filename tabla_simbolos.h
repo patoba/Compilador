@@ -16,7 +16,7 @@ int append_sym(SYMTAB *t,SYM *s) ; //Agrega al final de la tabla un nuevo simbol
 SYMTAB *pop_st(SSTACK *s) ; // Ejecuta un pop sobre la pila de tablas de simbolos
 void push_st(SSTACK *s,SYMTAB *st) ; // Ingresa una tabla a la pila de tablas de simbolos
 
-//ARGS *init_args(); // Retorna el apuntador a un tipo ARGS
+ARGS *init_args(); // Retorna el apuntador a un tipo ARGS
 ARG *init_arg(int dato); //Reserva memoria para un tipo ARG y retrona el apuntador
 SSTACK *init_sym_tab_stack(); // Reserva memoria para la pila
 SYMTAB *init_sym_tab(); // Reserva memoria para una tabla de simbolos vacia
@@ -30,6 +30,8 @@ void finish_args(ARGS *s);// libera memoria para una lista ARGS
 
 void print_tab_sym(SYMTAB *t); // Imprime en pantalla la tabla de simbolos
 
+int existe_id_en_tabla_sym(SYMTAB* tabla_sim, char* nombre);
+
 /*int getDir(SYMTAB *T , char *id);
 int getTipo(SYMTAB *T , char *id);
 char *getVar(SYMTAB *T , char *id);
@@ -39,5 +41,5 @@ int getNumArgs(SYMTAB *T, char *id);*/
 //int search_id_symbol(SYMTAB *T, char *id);
 SYM *search_Prev_SYM(SYMTAB *T, char *id);
 SYM *search_SYM(SYMTAB *T, char *id);
-SYM *set_sym(SYM *s, char *id, int dir, int tipo, char *var, ARGS *args, SYMTAB *ts, TYPTAB *tt);
+SYM *crear_sym(char *id, int dir, int tipo, char *var, ARGS *args);
 SYMTAB *getTopSym(SSTACK *pilaTS);

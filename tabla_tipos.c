@@ -83,7 +83,7 @@ TYP *init_type(){
     return tipo;
 }
 
-TYP *crear_typ(char *nombre, int tam, TB *tb){
+TYP *crear_type(char *nombre, int tam, TB *tb){
     static int id = -1;
     TYP *tipo = init_type();
     tipo->id = ++id;
@@ -112,10 +112,26 @@ TYP *search_type(TYPTAB *tt, int id){
     if(tt->num == 0)
         return NULL;
     TYP *temp = (*tt).head;
-    while((*temp).next != NULL)
+    while((*temp).next != NULL){
         if(temp->id != id)
             return temp;
+        temp = (*temp).next;
+    }
+        
     return NULL;
+}
+
+int getId(TYPTAB *tt, char* nombre){
+     if(tt->num == 0)
+        return -1;
+    TYP *temp = (*tt).head;
+    while((*temp).next != NULL){
+        if(strcmp(nombre, temp->nombre)==0)
+            return temp->id;
+        temp = (*temp).next;
+    }
+        
+    return -1;
 }
 
 int getTam(TYPTAB *t , int id){
@@ -159,11 +175,11 @@ void finish_type(TYP *s){
 
 TYPTAB *init_type_tab_global(){
     TYPTAB *global = init_tabla_tipo();
-    append_type(global, crear_typ("sin", 0, NULL));
-    append_type(global, crear_typ("ent", 4, NULL));
-    append_type(global, crear_typ("car", 1, NULL));
-    append_type(global, crear_typ("real", 4, NULL));
-    append_type(global, crear_typ("dreal", 8, NULL));   
+    append_type(global, crear_type("sin", 0, NULL));
+    append_type(global, crear_type("ent", 4, NULL));
+    append_type(global, crear_type("car", 1, NULL));
+    append_type(global, crear_type("real", 4, NULL));
+    append_type(global, crear_type("dreal", 8, NULL));   
     return global;
 }
 
@@ -194,13 +210,22 @@ void print_tipo_base(TB *tb){
 }
 
 void print_type(TYP *t ){
-    printf("%d\t%s\t%d\n", t->id, t->nombre, t->tam );
+    int base = -1; //no tiene
+    if(t->tb != NULL){
+        if(t->tb->is_est==0){
+            base = t->tb->tipo.tipo;
+        }else if(t->tb->is_est==1){
+        base = -2;  // estrcutura
+        }
+    }
+    
+    printf("%d\t%s\t%d\t%d\n", t->id, t->nombre, t->tam, base);
 }
 
 void print_tab_type(TYPTAB *tt ){
     if(tt->num == 0)
         return;
-    printf("id\tnombre\ttam\n");
+    printf("id\tnombre\ttam\ttipo_base\n");
     TYP *temp = (*tt).head;
     while((*temp).next != NULL){
         print_type(temp);
