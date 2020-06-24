@@ -17,7 +17,7 @@ extern TSTACK *STT;
 char *ampliar (char *dir, int t1, int t2, CODE *code) {
     int tipo_min = min(t1, t2);
     
-    if (t1 == t2 || t2 == tipo_min) return dir;
+    if (t1 == t2 || t2 == tipo_min || tipos_min == -1) return dir;
     else {
         TYPTAB *top = getTopType(STT);
         TYP *tipo = search_type(top, tipo_min);
@@ -44,7 +44,7 @@ char *ampliar (char *dir, int t1, int t2, CODE *code) {
 char *reducir(char *dir, int t1, int t2, CODE *code) {
     int tipo_max = max(t1, t2);
 
-    if (t1 == t2 || t1 == tipo_max) return dir;
+    if (t1 == t2 || t1 == tipo_max || tipo_max == -1) return dir;
     else {
         TYPTAB *top = getTopType(STT);
         TYP *tipo = search_type(top, tipo_max);
@@ -73,11 +73,14 @@ int max(int t1, int t2) {
     TYP *tipo1 = search_type(top, t1);
     TYP *tipo2 = search_type(top, t2);
 
+    if (tipo1 == NULL || tipo2 == NULL) return -1;
+
     if (tipo1->tam < tipo2->tam) {
         return t2;
     } else {
         return t1;
     }
+
 }
 
 /*
@@ -91,6 +94,8 @@ int min(int t1, int t2) {
 
     TYP *tipo1 = search_type(top, t1);
     TYP *tipo2 = search_type(top, t2);
+
+    if (tipo1 == NULL || tipo2 == NULL) return -1;
 
     if (tipo1->tam > tipo2->tam) {
         return t2;
