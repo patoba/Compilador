@@ -7,7 +7,7 @@ int main(int argc, char const *argv[])
 {
     FILE *f;
     if(argc < 2){
-        printf("faltan argumentos\n");
+        printf("Indique el nombre del archivo a compilar\n");
         return -1;        
     }
     f = fopen(argv[1], "r");

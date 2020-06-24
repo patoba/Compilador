@@ -108,6 +108,8 @@ programa: { STS = init_sym_tab_stack();
           } declaraciones funciones{
                                     //$$.codigo = $3.codigo;
                                     print_stack_tab_type(STT);
+                                    print_stack_tab_sym(STS);
+                                    
                                     };
 
 declaraciones: tipo{typeGBL = $1.type;} lista_var PUNTO_Y_COMA declaraciones
@@ -159,7 +161,7 @@ tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
 lista_var: lista_var COMA ID {  
                                 char *id = $3.dir;
                                 if(search_SYM(getTopSym(STS), id) == NULL){
-                                    Simbolo s = crear_sym(id, dir, typeGBL, "var", NULL, NULL, NULL);
+                                    SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
                                     append_sym(getTopSym(STS), s);//prueba
                                     dir = dir + getTam(getGlobal(STT), typeGBL);
                                 }else{
@@ -169,9 +171,9 @@ lista_var: lista_var COMA ID {
                                 }
                              }
             | ID {
-                    char *id = $3.dir;
+                    char *id = $1.dir;
                     if(search_SYM(getTopSym(STS), id) == NULL){
-                        Simbolo s = crear_sym(id, dir, typeGBL, "var", NULL, NULL, NULL);
+                        SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
                         append_sym(getTopSym(STS), s);//prueba
                         dir = dir + getTam(getGlobal(STT), typeGBL);
                     }else{

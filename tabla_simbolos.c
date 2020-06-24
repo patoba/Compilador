@@ -177,28 +177,44 @@ void finish_args(ARGS *s){
     free(s);
 }
 
+void print_args(ARGS *args){
+    printf("(%d, ", args->num);
+    ARG *temp = args->head;
+    while(temp->next != NULL){
+        printf("%d, ", temp->arg);
+        temp = temp->next;
+    }
+    printf("%d)", temp->arg);
+}
+
+void print_sym(SYM *s){    
+    printf("%d\t%d\t%d\t%s", s->dir, s->tipo, s->dir, s->var);
+    if(s->args != NULL){
+        print_args(s->args);
+    }
+    printf("/n");
+}
+
 // Imprime en pantalla la tabla de simbolos
 void print_tab_sym(SYMTAB *t){
-    SYM *simbol;
-    simbol=t->head;
-    printf("\n---------------------------------------- ---------------------------------\n");
-    printf("         |                   TABLA DE SIMBOLOS                  |\n");
-    printf("-------------------------------------------------------------------------\n");
-    printf("         |  DIR  |  TIPO  |     ID     |  ARGS  |  NUM  |  VAR  |\n");
-    printf("-------------------------------------------------------------------------\n");
-    while(simbol!=NULL){
-        if(simbol->args == NULL){
-            printf("         |%i\t |%i\t  |%s\t       | xxxxxx |%i\t|%s\t|\n",simbol->dir,simbol->tipo,simbol->id,simbol->num,simbol->var);
-        }else if(simbol->args != NULL){
-            printf("         |%i\t |%i\t  |%s\t     |%i\t  |%i\t|%s\t|\n",simbol->dir,simbol->tipo,simbol->id,simbol->args->num,simbol->num,simbol->var);
-        }
-        simbol=simbol->next;
+    printf("dir\ttipo\tid\tvar\targs\n");
+    SYM *temp = t->head;
+     while(temp->next != NULL){
+        print_sym(temp);
+        temp = temp->next;
     }
-    printf("-------------------------------------------------------------------------\n");
-
-
-
+    print_sym(temp);
 } 
+
+void print_stack_tab_sym(SSTACK *s){
+    SYMTAB *temp = s->top;
+     while(temp->next != NULL){
+        print_tab_sym(temp);
+        printf("\n");
+        temp = temp->next;
+    }
+    print_tab_sym(temp);
+}
 
 /* int getDir(SYMTAB *T , char *id){
 

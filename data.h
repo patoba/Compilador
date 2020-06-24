@@ -20,7 +20,6 @@ struct sym{
   int tipo; // tipo como indice a la tabla de tipos
   char id[40]; // identificador
   ARGS *args; // Lista de argumentos
-  int num; // numero de argumentos
   char var[16]; // tipo de variable
   SYM *next; // apuntador al siguiente simbolo
 };
