@@ -28,8 +28,6 @@ void print_args(ARGS *args);
 void print_sym(SYM *s);
 void print_stack_tab_sym(SSTACK *s);
 
-int existe_id_en_tabla_sym(SYMTAB* tabla_sim, char* nombre);
-
 /*int getDir(SYMTAB *T , char *id);
 int getTipo(SYMTAB *T , char *id);
 char *getVar(SYMTAB *T , char *id);

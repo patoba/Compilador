@@ -9,7 +9,6 @@ fin r;*/
 ent b;
 
 def sin hola(sin) inicio
-ent k;
-    terminar;
+    ent k;
     devolver;
 fin
