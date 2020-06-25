@@ -27,6 +27,8 @@ SSTACK *STS;
 int dir;
 int typeGBL, baseGBL;
 SDir *SDIR;
+CODE *code;
+
 //vector<int> SDir;
 %}
 
@@ -264,11 +266,18 @@ param_arr: CORCH_ABRE CORCH_CIERRA param_arr{
          | { $$.type = baseGBL; };
 
 
-sentencias: sentencias sentencia
-            | {};
+sentencias: sentencias sentencia{char *L = nueva_etiqueta();
+                                backpatch($1.nextlist, L);
+                                gen(L);}//gen no esta definido
+            | sentencia{//$$.nextlist = init_code();
+                        $$.nextlist = $1.nextlist
+                        //sentencias.code = sentencia.code
+                        };
 
-
-sentencia:  SI e_bool ENTONCES sentencia FIN{}
+sentencia:  SI e_bool ENTONCES sentencia FIN{ char *L = nueva_etiqueta();
+                                              backpatch($2.truelist, L)
+                                              $$.nextlist = combinar($2.falselist, $4.nextlist);
+                                              gen(L);}
           |  SI e_bool ENTONCES
             sentencia SINO sentencia FIN{}
           | MIENTRAS e_bool HACER sentencia FIN{}
@@ -306,9 +315,14 @@ e_bool: e_bool O e_bool{
                             }
         |NO e_bool{
                     }
-        |relacional_op{
+        |relacional_op{$$.truelist = $1.truelist;
+                    $$.falselist = $1.falselist;
                     }
-        |VERDADERO{
+        |VERDADERO{INDEX *i0 = init_index();
+                    $$.truelist = init_list_index(i0);
+                    CUAD *cuad = crear_cuadrupla("", "", "", "");
+                    append_quad(code, cuad);
+                    //gen("goto " + i0);
                     }
         |FALSO{
                 };

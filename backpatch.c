@@ -90,3 +90,12 @@ char *new_temporal() {
 
     return final;
 }
+
+char *nueva_etiqueta() {
+    static int temp = 0;
+    char *final = (char *)malloc(sizeof(char) * 6);
+
+    sprintf(final, "L%d", temp++);
+
+    return final;
+}

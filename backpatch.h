@@ -28,5 +28,6 @@ LINDEX *combinar(LINDEX *list1, LINDEX *list2); // Retorna una lista ligada de l
 void backpatch(CODE *code, LINDEX *list, char *label); // Remplaza label en cada aparición de un índice en la cuádruplas del código C
 
 char *new_temporal();
+char *nueva_etiqueta();
 
 #endif

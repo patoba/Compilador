@@ -17,6 +17,8 @@ typedef struct code{
 } CODE;
 
 CUAD *init_quad(); // Reserva memoria para una cuádrupla
+CUAD *crear_cuadrupla(char *op, char *arg1, char *arg2, char *res);
+
 void add_data_quad(CUAD *quad, char *op, char *arg1, char *arg2, char *res); // Llena el quad
 void finish_quad(CUAD *quad); // Libera la memoria de una cuádrupla
 
