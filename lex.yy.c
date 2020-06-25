@@ -1,5 +1,5 @@
 
-#line 3 "lex.yy.c"
+#line 2 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -575,9 +575,9 @@ char *yytext;
 
     extern void yyerror(char *);
 
-#line 579 "lex.yy.c"
+#line 578 "lex.yy.c"
 
-#line 581 "lex.yy.c"
+#line 580 "lex.yy.c"
 
 #define INITIAL 0
 #define COMENTARIO 1
@@ -798,7 +798,7 @@ YY_DECL
 	{
 #line 29 "lexer.l"
 
-#line 802 "lex.yy.c"
+#line 801 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1247,7 +1247,7 @@ YY_RULE_SETUP
 #line 185 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1251 "lex.yy.c"
+#line 1250 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMENTARIO):
 case YY_STATE_EOF(COMENTARIO2):
