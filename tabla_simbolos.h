@@ -1,9 +1,3 @@
-/*Fecha: 22/mayo/2020
-*Autor: Adrián Ulises Mercado Martı́nez
-*Descripción: Se definen las funciones para manipular una tabla de simbolos
-*/
-
-
 #include "data.h"
 
 #pragma once

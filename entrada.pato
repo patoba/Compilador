@@ -1,3 +1,9 @@
 dreal a4;
 ent a;
-ent [2][4]arr;
+ent [6][2][4]arr;
+estructura inicio
+    dreal a4;
+    ent a;
+    ent [6][2][4]arr;
+fin r;
+ent b;

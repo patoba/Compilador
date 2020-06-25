@@ -4,6 +4,7 @@
 
 #include "data.h"
 #include "tabla_tipos.h"
+#include "tabla_simbolos.h"
 
 int append_type(TYPTAB *tt, TYP *t){
     if(tt->num == 0){
@@ -112,6 +113,19 @@ TYP *search_type(TYPTAB *tt, int id){
     return NULL;
 }
 
+TYP *buscar_en_pila(TSTACK *s, int id){
+    if(s==NULL || s->top == NULL)
+        return NULL;
+    TYPTAB *temp = s->top;
+    while(temp != NULL){
+        TYP *encontrado = search_type(temp, id);
+        if(encontrado != NULL)
+            return encontrado;
+        temp = (*temp).next;
+    }
+    return NULL;
+}
+
 int getId(TYPTAB *tt, char* nombre){
      if(tt->num == 0)
         return -1;
@@ -140,11 +154,11 @@ char *getNombre( TYPTAB *t , int id ){
 }
 
 TYPTAB *getTopType(TSTACK *pila){
-    return pila->top;
+    return pila->tail;
 }
 
 TYPTAB *getGlobal(TSTACK *pila){
-    return pila->tail;
+    return pila->top;
 }
 
 void finish_type_tab_stack(TSTACK *s){
@@ -193,27 +207,22 @@ TB *crear_tipo_basado(int tipo){
 //IMPRIMIR
 
 void print_tipo_base(TB *tb){
-    if(tb->is_est==1){//estructura
+    if(tb ==NULL){
+        printf("-1\n");
+    }else if(tb->is_est==1){//estructura
+        printf("Su tabla de simbolos es: \n\n");
+        print_tab_sym(tb->tipo.est);
+        printf("Cuya tabla de tipos es:\n");
+        print_tab_type(tb->tipo.est->tt_asoc);
         printf("\n");
-    }else if(tb->is_est==0){//tipo simple
+    }else {//tipo simple
         printf("%d\n", tb->tipo.tipo);
-    }else{//no tiene tipo base
-        printf("\n");
     }
 }
 
 void print_type(TYP *t ){
-    int base = -1; //no tiene
-    if(t->tb != NULL){
-        if(t->tb->is_est==0){
-            base = t->tb->tipo.tipo;
-        }else if(t->tb->is_est==1){
-            base = -2;  // estrcutura
-        }
-    }
-    
-    printf("%d\t%s\t%d\t%d\n", t->id, t->nombre, t->tam, base);
-    
+    printf("%d\t%s\t%d\t", t->id, t->nombre, t->tam);
+    print_tipo_base(t->tb);
 }
 
 void print_tab_type(TYPTAB *tt ){
@@ -244,3 +253,14 @@ void print_stack_tab_type(TSTACK *s ){
             
 }
 
+int tamano_tabla_tipos(SYMTAB *st, TSTACK *s){
+    if(s == NULL || st == NULL || st->head==NULL || s->top==NULL)
+        return 0;
+    int tam = 0;
+    SYM *temp = st->head;
+    while(temp != NULL){
+        tam = tam + buscar_en_pila(s, temp->tipo)->tam;
+        temp = temp->next;
+    }
+    return tam;
+}

@@ -37,3 +37,6 @@ void print_tipo_base(TB *tb);//imprime un tipo base
 void print_type(TYP *t );//Imprime un tipo
 void print_tab_type(TYPTAB *t ); //*Imprime en pantalla la tabla de tipos
 void print_stack_tab_type(TSTACK *s );//Imprime stack de tablas de simbolos
+
+int tamano_tabla_tipos(SYMTAB *, TSTACK *s);
+TYP *buscar_en_pila(TSTACK *s, int id);

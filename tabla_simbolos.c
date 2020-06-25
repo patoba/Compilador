@@ -197,7 +197,7 @@ void print_sym(SYM *s){
 // Imprime en pantalla la tabla de simbolos
 void print_tab_sym(SYMTAB *t){
     printf("id\ttipo\tdir\tvar\targs\n");
-    if(t==NULL)
+    if(t==NULL||t->head==NULL)
         return;
     SYM *temp = t->head;
      while(temp->next != NULL){
@@ -272,5 +272,6 @@ SYM *crear_sym(char *id, int dir, int tipo, char *var, ARGS *args){
 }
 
 SYMTAB *getTopSym(SSTACK *pilaTS){
-    return pilaTS->top;
+    return pilaTS->tail;
 }
+

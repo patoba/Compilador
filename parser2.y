@@ -148,11 +148,12 @@ declaraciones: tipo{typeGBL = $1.type;} lista_var PUNTO_Y_COMA declaraciones
 //creacion del tipo revisar
 //getTam mala llamada
 //id esta mal
-tipo_registro: ESTRUCTURA INICIO{  STS.push(PilaTablaSimbolos());
+tipo_registro: ESTRUCTURA INICIO{  
+                                    STS.push(PilaTablaSimbolos());
                                    STT.push(PilaTablaTipos());
                                    SDir.push_back(dir);
                                    dir = 0;
-                                   } declaraciones{TablaSimbolos SymTab = STS.pop();
+                                   } declaraciones{TablaSimbolos SymTab = pop_st(STS);
                                                     //SymTab.tt = STT.pop();
                                                     //int tam = SymTab.get_tamano();
 

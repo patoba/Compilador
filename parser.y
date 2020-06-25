@@ -10,6 +10,7 @@
 #include "cuadruplas.h"
 #include "backpatch.h"
 #include "tipos.h"
+#include "pila_dir.h"
 
 extern int yylex();
 extern int yylineno;
@@ -25,6 +26,7 @@ TSTACK *STT;
 SSTACK *STS;
 int dir;
 int typeGBL, baseGBL;
+SDir *SDIR;
 //vector<int> SDir;
 %}
 
@@ -116,6 +118,7 @@ programa: {
             push_st(STS, primera);
 
             dir = 0;
+            SDIR = create_s_dir();
           } declaraciones funciones{
                                     //$$.codigo = $3.codigo;
                                     print_stack_tab_type(STT);
@@ -132,9 +135,23 @@ declaraciones: tipo{typeGBL = $1.type;} lista_var PUNTO_Y_COMA declaraciones
 //getTam mala llamada
 //id esta mal
 tipo_registro: ESTRUCTURA INICIO{  
-                                   } declaraciones{
-                                                    } FIN {
+                                   push_tt(STT, init_tabla_tipo());
+                                   push_st(STS, init_sym_tab());
+                                   
+                                   pushSDir(SDIR, dir);
+                                   dir = 0;
+                                   } declaraciones FIN {
+                                                        SYMTAB *SymTab = pop_st(STS);
+                                                        int tam = tamano_tabla_tipos(SymTab, STT);
+                                                        SymTab->tt_asoc = pop_tt(STT);
                                                         
+
+                                                        dir = popSDir(SDIR);
+                                                        
+                                                        TB *tb = crear_estructura(SymTab); //falla implementacion
+                                                        TYP *nuevo = crear_type("struct", tam, tb);
+                                                        append_type(getTopType(STT), nuevo);
+                                                        $$.type = nuevo->id;
                                                     };
 
 tipo: base{baseGBL = $1.base;} tipo_arreglo{$$.type = $3.type;};
@@ -154,7 +171,8 @@ tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
                                                             int temp_dir = atoi($2.dir);
                                                             if(temp_dir > 0){ //dir debe ser entero
                                                                 TB* tipo_base = crear_tipo_basado($4.type);
-                                                                TYP *nuevo = crear_type("array", atoi($2.dir) * getTam(getGlobal(STT), $4.type), tipo_base);
+                                                                int tam_anterior = buscar_en_pila(STT, $4.type)->tam;
+                                                                TYP *nuevo = crear_type("array", atoi($2.dir) * tam_anterior, tipo_base);
                                                                 append_type(getTopType(STT), nuevo);
                                                                 $$.type = nuevo->id;
                                                             }else{
@@ -377,7 +395,7 @@ void agregar_sym_var(char *id){
     if(search_SYM(getTopSym(STS), id) == NULL){
         SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
         append_sym(getTopSym(STS), s);//prueba
-        dir = dir + getTam(getGlobal(STT), typeGBL);
+        dir = dir + buscar_en_pila(STT, typeGBL)->tam;
     }else{
         char s[80] = "Ya existe una variable llamada ";
         strcat(s, id);
