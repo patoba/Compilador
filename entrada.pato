@@ -1,9 +1,15 @@
-dreal a4;
+/*dreal a4;
 ent a;
 ent [6][2][4]arr;
 estructura inicio
     dreal a4;
     ent a;
     ent [6][2][4]arr;
-fin r;
+fin r;*/
 ent b;
+
+def sin hola(sin) inicio
+ent k;
+    terminar;
+    devolver;
+fin
