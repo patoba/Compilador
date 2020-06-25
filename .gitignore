@@ -53,3 +53,7 @@ dkms.conf
 
 # VSCode Enviroments
 .vscode/
+
+# Archivos Inecesarios
+y.tab.*
+lex.yy.*
