@@ -121,10 +121,10 @@ programa: {
             SDIR = create_s_dir();
           } declaraciones funciones{
                                     //$$.codigo = $3.codigo;
-                                    print_stack_tab_type(STT);
+                                    //print_stack_tab_type(STT);
                                     //printf("aqui");
                                     //printf("%d\n", STT->top.);
-                                    print_stack_tab_sym(STS);
+                                    //print_stack_tab_sym(STS);
                                     };
 
 declaraciones: tipo{typeGBL = $1.type;} lista_var PUNTO_Y_COMA declaraciones
@@ -195,7 +195,7 @@ funciones: DEF tipo ID{
                         }else{
                             yyerror("Ya existe una funcion declarada con ese identificador");
                         }
-                      } PAR_ABRE argumentos PAR_CIERRA INICIO declaraciones sentencias{
+                      } PAR_ABRE argumentos{print_stack_tab_sym(STS);} PAR_CIERRA INICIO declaraciones sentencias{
                                                                                         pop_st(STS);
                                                                                         pop_tt(STT);
                                                         
@@ -263,7 +263,8 @@ param_arr: CORCH_ABRE CORCH_CIERRA param_arr{
          | { $$.type = baseGBL; };
 
 
-sentencias: sentencias sentencia;
+sentencias: sentencias sentencia
+            | {};
 
 
 sentencia:  SI e_bool ENTONCES sentencia FIN{}

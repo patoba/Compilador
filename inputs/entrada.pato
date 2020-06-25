@@ -8,7 +8,7 @@ estructura inicio
 fin r;*/
 ent b;
 
-def sin hola(sin) inicio
-    ent k;
+def sin hola(ent k, ent [][]o) inicio
+    ent s;
     devolver;
 fin
