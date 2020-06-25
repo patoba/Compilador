@@ -139,6 +139,8 @@ cadena "\""[c\c]*"\""
     return MOD;
 }
 <INITIAL>{num} {
+    strcpy(yylval.tipo.dir, yytext);
+    yylval.tipo.type = 1;
     return NUM;
 }
 <INITIAL>{cadena} {

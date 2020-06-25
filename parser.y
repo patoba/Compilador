@@ -154,7 +154,7 @@ tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
                                                             int temp_dir = atoi($2.dir);
                                                             if(temp_dir > 0){ //dir debe ser entero
                                                                 TB* tipo_base = crear_tipo_basado($4.type);
-                                                                TYP *nuevo = crear_type("array", $2.type, tipo_base);
+                                                                TYP *nuevo = crear_type("array", atoi($2.dir) * getTam(getGlobal(STT), $4.type), tipo_base);
                                                                 append_type(getTopType(STT), nuevo);
                                                                 $$.type = nuevo->id;
                                                             }else{
@@ -171,11 +171,9 @@ tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
 //tabla simbolos debe tener existe
 //
 lista_var: lista_var COMA ID {  
-                                //printf("%s", $3.dir);
                                 agregar_sym_var($3.dir);
                              }
             | ID {
-                    //char *id = $1.dir;
                     agregar_sym_var($1.dir);
                  };
 
