@@ -195,7 +195,8 @@ funciones: DEF tipo ID{
                         }else{
                             yyerror("Ya existe una funcion declarada con ese identificador");
                         }
-                      } PAR_ABRE argumentos{print_stack_tab_sym(STS);} PAR_CIERRA INICIO declaraciones sentencias{
+                      } PAR_ABRE argumentos{print_stack_tab_sym(STS);
+                                            print_stack_tab_type(STT);} PAR_CIERRA INICIO declaraciones sentencias{
                                                                                         pop_st(STS);
                                                                                         pop_tt(STT);
                                                         
