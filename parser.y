@@ -18,8 +18,8 @@ extern char* yytext;
 void yyerror(char *s);
 
 //funciones acciones EdT
-void agregar_sym_var(char *id);
-
+void agregar_sym_var(char *id, char *nombre);
+int crear_arreglo(int tipo, int val, int arreglo);
 
 //variables globales
 TSTACK *STT;
@@ -95,7 +95,7 @@ SDir *SDIR;
 %token PUNTO_Y_COMA
 
 %type<lista> lista_arg lista_param parametros argumentos
-%type<tipo> expresion arreglo param_arr arg tipo_arreglo 
+%type<tipo> expresion arreglo param_arr arg tipo_arreglo tipo_arg
 %type<tipo> tipo_registro declaraciones relacional tipo 
 //%type<estructura> dato_est_sim variable_comp
 %type<variable> variable
@@ -167,20 +167,7 @@ base: ENT{$$.base = getId(getGlobal(STT), "ent");}
 //Poner type de tipo arreglo
 //creacion de tipo es posible que este mal
 tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
-                                                        if($2.type == getId(getGlobal(STT), "ent")){
-                                                            int temp_dir = atoi($2.dir);
-                                                            if(temp_dir > 0){ //dir debe ser entero
-                                                                TB* tipo_base = crear_tipo_basado($4.type);
-                                                                int tam_anterior = buscar_en_pila(STT, $4.type)->tam;
-                                                                TYP *nuevo = crear_type("array", atoi($2.dir) * tam_anterior, tipo_base);
-                                                                append_type(getTopType(STT), nuevo);
-                                                                $$.type = nuevo->id;
-                                                            }else{
-                                                                yyerror("El indice debe ser mayor a cero");
-                                                            }
-                                                        }else{
-                                                            yyerror("El indice debe ser tipo entero\n");
-                                                        }
+                                                        $$.type = crear_arreglo($2.type, atoi($2.dir), $4.type);
                                                       }
             | {$$.type=baseGBL;};
 
@@ -189,41 +176,91 @@ tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
 //tabla simbolos debe tener existe
 //
 lista_var: lista_var COMA ID {  
-                                agregar_sym_var($3.dir);
+                                agregar_sym_var($3.dir, "var");
                              }
             | ID {
-                    agregar_sym_var($1.dir);
+                    agregar_sym_var($1.dir, "var");
                  };
 
 //ListaRet no existe
 //sdir no existe
 //cmpRet
-funciones: DEF tipo ID{
-                        }PAR_ABRE argumentos PAR_CIERRA INICIO declaraciones sentencias{
+funciones: DEF tipo ID{ 
+                        if(existe_id_en_tabla_sym(getGlobal(STS), $3.dir) == 0) {
+                            push_tt(STT, init_tabla_tipo());
+                            push_st(STS, init_sym_tab());
+                            pushSDir(SDIR, dir);
+                            dir = 0;
+                            //listaRET = newListRet();
+                        }else{
+                            yyerror("Ya existe una funcion declarada con ese identificador");
+                        }
+                      } PAR_ABRE argumentos PAR_CIERRA INICIO declaraciones sentencias{
+                                                                                        pop_st(STS);
+                                                                                        pop_tt(STT);
+                                                        
+                                                                                        // if(cmpRet(lista_retorno, $2.type)){
+                                                                                        //     L = nueva_etiqueta();
+                                                                                        //     backpatch($10.nextlist, L);
+                                                                                        //     gen(L);
+                                                                                        //     STS.pop();
+                                                                                        //     STT.pop();
+                                                                                        // }else{
+                                                                                        //     error("...");
+                                                                                        // }
                                                                                         } FIN funciones
             | {};
 
 //argumentos tiene num, list
 //lista_arg tiene lista, num
-argumentos: lista_arg{}
-            |SIN {};
+argumentos: lista_arg {
+                        $$.lista = $1.lista;
+                        $$.num = $1.num;
+                      }
+            | SIN {
+                    $$.lista = NULL;
+                    $$.num = 0;
+                 };
 
 //lista_arg posee lista, num
 //arg tiene type
 //newList no esta definido
-lista_arg: lista_arg COMA arg { };
-         | arg{ };
+lista_arg: lista_arg COMA arg { 
+                                $$.lista = $1.lista;
+                                append_arg($$.lista, $3.type);
+                                $$.num = $1.num + 1;
+                              };
+         | arg { 
+                $$.lista = init_args();
+                append_arg($$.lista, $1.type);
+                $$.num = 1;
+               };
 
 arg: tipo_arg ID{
+                    // if(existe_id_en_tabla_sym(getGlobal(STS), $2.dir) == 0){
+                    //     SYM s = crear_sym($2.dir, dir, baseGBL, "arg", NULL);
+                    //     append_sym(getTopSym(STS), s);
+                    //     dir = dir + buscar_en_pila(STT, baseGBL)->tam;
+                    //     $$.type = baseGBL;
+                    // } else{
+                    //     yyerror("Ya existe una variable con ese nombre");
+                    // }
+                    typeGBL = $1.type;
+                    agregar_sym_var($2.dir, "arg");
                 };
 
 //esta esta mal
 //base tiene pase, param
 //tipo.type ????
-tipo_arg: base{baseGBL = $1.base;} param_arr{};
+tipo_arg: base { baseGBL = $1.base; } param_arr { $$.type = $3.type; };
 
-param_arr: CORCH_ABRE CORCH_CIERRA param_arr{};
-         | {};
+param_arr: CORCH_ABRE CORCH_CIERRA param_arr{
+                                                TB *tipo_base = crear_tipo_basado($3.type);
+                                                TYP *nuevo = crear_type("array", 0, tipo_base);
+                                                append_type(getTopType(STT), nuevo);
+                                                $$.type = nuevo->id;
+                                            };
+         | { $$.type = baseGBL };
 
 
 sentencias: sentencias sentencia {};
@@ -391,14 +428,30 @@ void yyerror(char *s){
     printf("%s, linea: %d, token: %s\n",s, yylineno, yytext);
 }
 
-void agregar_sym_var(char *id){
+void agregar_sym_var(char *id, char *nombre){
     if(search_SYM(getTopSym(STS), id) == NULL){
-        SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
+        SYM *s = crear_sym(id, dir, typeGBL, nombre, NULL);
         append_sym(getTopSym(STS), s);//prueba
         dir = dir + buscar_en_pila(STT, typeGBL)->tam;
     }else{
         char s[80] = "Ya existe una variable llamada ";
         strcat(s, id);
         yyerror(s);
+    }
+}
+
+int crear_arreglo(int tipo, int val, int arreglo) {
+    if(tipo == getId(getGlobal(STT), "ent")){
+        if(val > 0){ 
+            TB* tipo_base = crear_tipo_basado(arreglo);
+            int tam_anterior = buscar_en_pila(STT, arreglo)->tam;
+            TYP *nuevo = crear_type("array", val * tam_anterior, tipo_base);
+            append_type(getTopType(STT), nuevo);
+            return nuevo->id;
+        }else{
+            yyerror("El indice debe ser mayor a cero");
+        }
+    }else{
+        yyerror("El indice debe ser tipo entero\n");
     }
 }

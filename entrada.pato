@@ -1,9 +1,19 @@
-dreal a4;
+/*dreal a4;
 ent a;
 ent [6][2][4]arr;
 estructura inicio
     dreal a4;
     ent a;
     ent [6][2][4]arr;
+
+    estructura inicio
+        ent b28;
+    fin muf;
 fin r;
-ent b;
+ent b;*/
+
+ent c;
+def ent muf (ent a, dreal [][][]b) inicio
+    ent a;
+    devolver;
+fin
