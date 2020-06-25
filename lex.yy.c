@@ -1142,68 +1142,70 @@ case 40:
 YY_RULE_SETUP
 #line 147 "lexer.l"
 {
+    
     return CARACTER;
 }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 150 "lexer.l"
+#line 151 "lexer.l"
 {
     return VERDADERO;
 }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 153 "lexer.l"
+#line 154 "lexer.l"
 {
     return FALSO;
 }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 156 "lexer.l"
+#line 157 "lexer.l"
 {
     return PUNTO;
 }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 159 "lexer.l"
+#line 160 "lexer.l"
 {
     return PUNTO_Y_COMA;
 }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 162 "lexer.l"
+#line 163 "lexer.l"
 {
     return PAR_ABRE;
 }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 165 "lexer.l"
+#line 166 "lexer.l"
 {
     return PAR_CIERRA;
 }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 168 "lexer.l"
+#line 169 "lexer.l"
 {
+    strcpy(yylval.tipo.dir, yytext);
     return ID;
 }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 171 "lexer.l"
+#line 173 "lexer.l"
 {
     return CORCH_ABRE;
 }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 174 "lexer.l"
+#line 176 "lexer.l"
 {
     return CORCH_CIERRA;
 }
@@ -1211,41 +1213,41 @@ YY_RULE_SETUP
 case 50:
 /* rule 50 can match eol */
 YY_RULE_SETUP
-#line 177 "lexer.l"
+#line 179 "lexer.l"
 {/*Ignora espacios en blaco*/}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 178 "lexer.l"
+#line 180 "lexer.l"
 {BEGIN(COMENTARIO);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 179 "lexer.l"
+#line 181 "lexer.l"
 {yyerror(yytext);}
 	YY_BREAK
 case 53:
 /* rule 53 can match eol */
 YY_RULE_SETUP
-#line 180 "lexer.l"
+#line 182 "lexer.l"
 {/*Ignorar comentarios*/}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 181 "lexer.l"
+#line 183 "lexer.l"
 {/*Ignorar comentarios*/}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 182 "lexer.l"
+#line 184 "lexer.l"
 {BEGIN(INITIAL);}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 183 "lexer.l"
+#line 185 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1249 "lex.yy.c"
+#line 1251 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMENTARIO):
 case YY_STATE_EOF(COMENTARIO2):
@@ -2264,6 +2266,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 183 "lexer.l"
+#line 185 "lexer.l"
 
 

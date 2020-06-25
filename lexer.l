@@ -145,6 +145,7 @@ cadena "\""[c\c]*"\""
     return CADENA;
 }
 <INITIAL>{caracter} {
+    
     return CARACTER;
 }
 <INITIAL>"verdadero" {
@@ -166,6 +167,7 @@ cadena "\""[c\c]*"\""
     return PAR_CIERRA;
 }
 <INITIAL>{id} {
+    strcpy(yylval.tipo.dir, yytext);
     return ID;
 }
 <INITIAL>"[" {

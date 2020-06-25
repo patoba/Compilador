@@ -10,16 +10,12 @@ int append_type(TYPTAB *tt, TYP *t){
         tt -> head = t;
         (*tt).tail = t;
         (*tt).num = 1;
-        return 1;
+        return t->id;
     }
-    TYP *temp = (*tt).head;
-    while((*temp).next != NULL){
-        temp = (*temp).next;
-    }
-    (*temp).next = t;
-    (*tt).num = (*tt).num + 1; 
+    tt->tail->next = t;
     tt->tail = t;
-    return 1;
+    (*tt).num = (*tt).num + 1; 
+    return t->id;
 }
 
 void clear_type_tab(TYPTAB *tt){
@@ -55,16 +51,12 @@ TYPTAB *pop_tt(TSTACK *s){
 
 void push_tt(TSTACK *s, TYPTAB *tt){
     if(s->top == NULL && s->tail == NULL){
-        s -> top = tt;
+        s->top = tt;
         s->tail = tt;
         return;
     }
-    TYPTAB *temp = (*s).top;
-    while((*temp).next != NULL){
-        temp = (*temp).next;
-    }
-    (*temp).next = tt;
-    s->tail = tt;
+    s->tail->next = tt;
+    s->tail  = tt;
 }
 
 TB *init_tipo_base(){
@@ -112,12 +104,11 @@ TYP *search_type(TYPTAB *tt, int id){
     if(tt->num == 0)
         return NULL;
     TYP *temp = (*tt).head;
-    while((*temp).next != NULL){
-        if(temp->id != id)
+    while(temp != NULL){
+        if(temp->id == id)
             return temp;
         temp = (*temp).next;
     }
-        
     return NULL;
 }
 
@@ -125,9 +116,11 @@ int getId(TYPTAB *tt, char* nombre){
      if(tt->num == 0)
         return -1;
     TYP *temp = (*tt).head;
-    while((*temp).next != NULL){
-        if(strcmp(nombre, temp->nombre)==0)
+    while(temp != NULL){
+        if(strcmp(nombre, temp->nombre)==0){
             return temp->id;
+        }
+            
         temp = (*temp).next;
     }
         
@@ -215,22 +208,24 @@ void print_type(TYP *t ){
         if(t->tb->is_est==0){
             base = t->tb->tipo.tipo;
         }else if(t->tb->is_est==1){
-        base = -2;  // estrcutura
+            base = -2;  // estrcutura
         }
     }
     
     printf("%d\t%s\t%d\t%d\n", t->id, t->nombre, t->tam, base);
+    
 }
 
 void print_tab_type(TYPTAB *tt ){
+     printf("id\tnombre\ttam\ttipo_base\n");
     if(tt->num == 0)
         return;
-    printf("id\tnombre\ttam\ttipo_base\n");
     TYP *temp = (*tt).head;
     while((*temp).next != NULL){
         print_type(temp);
         temp = (*temp).next;
     }
+    
     print_type(temp);
         
 }
@@ -241,8 +236,11 @@ void print_stack_tab_type(TSTACK *s ){
     TYPTAB *temp = (*s).top;
     while((*temp).next != NULL){
         print_tab_type(temp);
+        printf("\n");
         temp = (*temp).next;
     }
+
     print_tab_type(temp);
+            
 }
 

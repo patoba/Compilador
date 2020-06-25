@@ -1,62 +1,47 @@
-#ifndef SYMTAB_H
-#define SYMTAB_H
- 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "tabla_simbolos.h"
 #include "data.h"
 
-//Agrega un nuevo argumento
-void append_arg(ARGS* args, int arg){       
-    //Crea un nuevo argumento
-    ARG* nuevoArg = (ARG*)malloc(sizeof(ARG));
-    nuevoArg -> arg = arg;
-    nuevoArg -> next = NULL;
-
-    if(args -> num > 0){
-        ARG* argumentoTemp = args -> head;
-        //Recorre la lista y añade el argumento
-        for(int i=0; i< args->num; i++)
-            argumentoTemp = argumentoTemp -> next;
-        argumentoTemp -> next = nuevoArg;
-    }else //Es el primer argumento
-        args->head = nuevoArg;
-    //Mueve el apuntador del final al nuevo elemento    
-    args->tail = nuevoArg;
-    //Aumenta el número de argumentos
-    args->num++;
+void append_arg(ARGS* args, int num){
+    ARG *arg = crear_arg(num);
+    if(args->num == 0){
+        args -> head = arg;
+        (*args).tail = arg;
+        (*args).num = 1;
+        return;
+    }
+    args->tail->next = arg;
+    args->tail = arg;
+    (*args).num = (*args).num + 1; 
+    return;
 }
 
 
 //Compara dos listas y devuelve 1 si son iguales, 0 si son diferentes
 int compare_args(ARGS *a1, ARGS *a2){
-    if(a1->num == a2->num){
-        ARG* apL1 = a1->head;
-        ARG* apL2 = a2->head;
-        
-        for(int i=0; i < a1->num; i++){
-            if(apL1->arg != apL2->arg)
-                return 0;
-            else
-            {
-                apL1 = apL1 -> next;
-                apL1 = apL1 -> next;
-            }
-        }
-        return 1;
-    }else
+    if(a1 == NULL || a2 == NULL && !(a1 == NULL && a2 == NULL))
         return 0;
-    
+    if(a1->num != a2->num)
+        return 0;
+    ARG *temp1 = a1->head;
+    ARG *temp2 = a2->head;
+    for(int i = 0; i < a1->num; i++){
+        if(temp1->arg != temp2->arg)
+            return 0;
+        temp1 = temp1->next;
+        temp2 = temp2->next;
+    }
+    return 1;
 }
 
-
-
-
 SYM *search_SYM(SYMTAB *T, char *id){
+    if(T==NULL)
+        return NULL;
     SYM *simbol=T->head;
     while(simbol!=NULL){
-        if (strcmp(simbol->id,id)==0)
+        if (strcmp(simbol->id, id)==0)
             return simbol;
         simbol = simbol->next;
     }
@@ -64,49 +49,59 @@ SYM *search_SYM(SYMTAB *T, char *id){
 }
 
 //Agrega al final de la tabla un nuevo simbolo, devuelve 1 cuando se inserta y 0 cuando no
-int append_sym(SYMTAB *t,SYM *s){
-    //Si la tabla de símbolos está vacía...
+int append_sym(SYMTAB *t, SYM *s){
     if(t->head == NULL){
         t->head = s;
         t->tail = s;
-        t->num++;
+        t->num = 1;
         return 1;
     }
-    //Verifica que el símbolo no este en la tabla...
-    else if(search_SYM(t, s->id) != NULL){
-        SYM* simbTemp = t-> head;
-        //Recorre la tabla...
-        for(int i=0; i < t->num; i++)
-            simbTemp = simbTemp -> next;
-        simbTemp -> next = s;
-        t->tail = s;
-        t->num ++;
-        return 1;
-    }else
-        return 0;
+    t->tail->next = s;
+    t->tail = s;
+    t->num = t->num + 1;
+    return 1;
 } 
 
-// Vacia la tabla
-/* void clear_sym_tab(SYMTAB *t){
-    
-}*/
 
 // Ejecuta un pop sobre la pila de tablas de simbolos y retorna la tabla eliminada
 // Checar
 SYMTAB *pop_st(SSTACK *s){
-    SYMTAB* temp;
-    temp = s->top;
-    s->top = temp->next;
-    return temp;
-
+    if((*s).top == NULL){
+        printf("Se hizo pop de una pila vacia\n");
+        return NULL;
+    }
+    SYMTAB *temp = (*s).top;
+    while((*temp).next->next != NULL){
+        temp = (*temp).next;
+    }
+    SYMTAB *ret = (*temp).next;
+    (*temp).next = NULL;
+    (*s).tail = temp;
+    return ret;
 } 
 
 // Ingresa una tabla a la pila de tablas de simbolos
 // Checar
 void push_st(SSTACK *s,SYMTAB *st){
-    st->next = s->top;
-    s->top = st;
+    if(s->top == NULL && s->tail == NULL){
+        s->top = st;
+        s->tail = st;
+        return;
+    }
+    s->tail->next = st;
+    s->tail = st;
 } 
+
+ARG *init_arg(){
+    ARG *nuevo = (ARG*) malloc(sizeof(ARG));
+    return nuevo;
+}
+
+ARG *crear_arg(int arg){
+    ARG *nuevo = init_arg();
+    nuevo->arg = arg;
+    return nuevo;
+}
 
 //Retorna el apuntador a un tipo ARGS
 ARGS *init_args(){
@@ -188,16 +183,22 @@ void print_args(ARGS *args){
 }
 
 void print_sym(SYM *s){    
-    printf("%d\t%d\t%d\t%s", s->dir, s->tipo, s->dir, s->var);
+    printf("%s\t%d\t%d\t%s\t", s->id, s->tipo, s->dir, s->var);
     if(s->args != NULL){
-        print_args(s->args);
+       print_args(s->args);
+    }else
+    {
+        printf("N/A");
     }
-    printf("/n");
+    
+    printf("\n");
 }
 
 // Imprime en pantalla la tabla de simbolos
 void print_tab_sym(SYMTAB *t){
-    printf("dir\ttipo\tid\tvar\targs\n");
+    printf("id\ttipo\tdir\tvar\targs\n");
+    if(t==NULL)
+        return;
     SYM *temp = t->head;
      while(temp->next != NULL){
         print_sym(temp);
@@ -207,6 +208,8 @@ void print_tab_sym(SYMTAB *t){
 } 
 
 void print_stack_tab_sym(SSTACK *s){
+    if(s->top == NULL && s->tail == NULL)
+        return;
     SYMTAB *temp = s->top;
      while(temp->next != NULL){
         print_tab_sym(temp);
@@ -252,14 +255,10 @@ SYM *search_Prev_SYM(SYMTAB *T, char *id){
     return NULL;
 }
 
-
-
-
-
 //Checar
 SYM *crear_sym(char *id, int dir, int tipo, char *var, ARGS *args){
     SYM *s = init_sym();
-    strcpy(s->id,id);
+    strcpy(s->id, id);
     s->dir = dir;
     s->tipo = tipo;
     if (var != NULL )
@@ -275,4 +274,3 @@ SYM *crear_sym(char *id, int dir, int tipo, char *var, ARGS *args){
 SYMTAB *getTopSym(SSTACK *pilaTS){
     return pilaTS->top;
 }
-#endif

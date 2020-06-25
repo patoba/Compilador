@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
     }
     f = fopen(argv[1], "r");
     if(!f){
-        printf("El archivo no se puede abrir");
+        printf("El archivo no se puede abrir\n");
         return -1;
     }
     yyin = f;

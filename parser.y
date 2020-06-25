@@ -16,6 +16,10 @@ extern int yylineno;
 extern char* yytext;
 void yyerror(char *s);
 
+//funciones acciones EdT
+void agregar_sym_var(char *id);
+
+
 //variables globales
 TSTACK *STT;
 SSTACK *STS;
@@ -100,20 +104,28 @@ int typeGBL, baseGBL;
 
 %%
 
-programa: { STS = init_sym_tab_stack();
+programa: { 
+            
+            STS = init_sym_tab_stack();
             STT = init_type_tab_stack();
+            
             TYPTAB *global = init_type_tab_global();
             push_tt(STT, global);
+
+            SYMTAB *primera = init_sym_tab();
+            push_st(STS, primera);
+
             dir = 0;
           } declaraciones funciones{
                                     //$$.codigo = $3.codigo;
                                     print_stack_tab_type(STT);
+                                    //printf("aqui");
+                                    //printf("%d\n", STT->top.);
                                     print_stack_tab_sym(STS);
-                                    
                                     };
 
 declaraciones: tipo{typeGBL = $1.type;} lista_var PUNTO_Y_COMA declaraciones
-             | tipo_registro {typeGBL= $1.type;} lista_var PUNTO_Y_COMA declaraciones
+             | tipo_registro{typeGBL= $1.type;} lista_var PUNTO_Y_COMA declaraciones
              | {};
 
 //creacion del tipo revisar
@@ -159,28 +171,12 @@ tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
 //tabla simbolos debe tener existe
 //
 lista_var: lista_var COMA ID {  
-                                char *id = $3.dir;
-                                if(search_SYM(getTopSym(STS), id) == NULL){
-                                    SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
-                                    append_sym(getTopSym(STS), s);//prueba
-                                    dir = dir + getTam(getGlobal(STT), typeGBL);
-                                }else{
-                                    char s[80] = "Ya existe una variable llamada ";
-                                    strcat(s, id);
-                                    yyerror(s);
-                                }
+                                //printf("%s", $3.dir);
+                                agregar_sym_var($3.dir);
                              }
             | ID {
-                    char *id = $1.dir;
-                    if(search_SYM(getTopSym(STS), id) == NULL){
-                        SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
-                        append_sym(getTopSym(STS), s);//prueba
-                        dir = dir + getTam(getGlobal(STT), typeGBL);
-                    }else{
-                        char s[80] = "Ya existe una variable llamada ";
-                        strcat(s, id);
-                        yyerror(s);
-                    }
+                    //char *id = $1.dir;
+                    agregar_sym_var($1.dir);
                  };
 
 //ListaRet no existe
@@ -379,3 +375,14 @@ void yyerror(char *s){
     printf("%s, linea: %d, token: %s\n",s, yylineno, yytext);
 }
 
+void agregar_sym_var(char *id){
+    if(search_SYM(getTopSym(STS), id) == NULL){
+        SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
+        append_sym(getTopSym(STS), s);//prueba
+        dir = dir + getTam(getGlobal(STT), typeGBL);
+    }else{
+        char s[80] = "Ya existe una variable llamada ";
+        strcat(s, id);
+        yyerror(s);
+    }
+}

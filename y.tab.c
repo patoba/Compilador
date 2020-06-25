@@ -36,13 +36,17 @@ extern int yylineno;
 extern char* yytext;
 void yyerror(char *s);
 
+/*funciones acciones EdT*/
+void agregar_sym_var(char *id);
+
+
 /*variables globales*/
 TSTACK *STT;
 SSTACK *STS;
 int dir;
 int typeGBL, baseGBL;
 /*vector<int> SDir;*/
-#line 27 "parser.y"
+#line 31 "parser.y"
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
@@ -81,7 +85,7 @@ typedef union {
     } lista_indices;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 85 "y.tab.c"
+#line 89 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -484,13 +488,24 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 376 "parser.y"
+#line 373 "parser.y"
 
 void yyerror(char *s){
     printf("%s, linea: %d, token: %s\n",s, yylineno, yytext);
 }
 
-#line 494 "y.tab.c"
+void agregar_sym_var(char *id){
+    if(search_SYM(getTopSym(STS), id) == NULL){
+        SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
+        append_sym(getTopSym(STS), s);//prueba
+        dir = dir + getTam(getGlobal(STT), typeGBL);
+    }else{
+        char s[80] = "Ya existe una variable llamada ";
+        strcat(s, id);
+        yyerror(s);
+    }
+}
+#line 509 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -693,80 +708,89 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 103 "parser.y"
-	{ STS = init_sym_tab_stack();
+#line 107 "parser.y"
+	{ 
+            
+            STS = init_sym_tab_stack();
             STT = init_type_tab_stack();
+            
             TYPTAB *global = init_type_tab_global();
             push_tt(STT, global);
+
+            SYMTAB *primera = init_sym_tab();
+            push_st(STS, primera);
+
             dir = 0;
           }
 break;
 case 2:
-#line 108 "parser.y"
+#line 119 "parser.y"
 	{
                                     /*$$.codigo = $3.codigo;*/
                                     print_stack_tab_type(STT);
+                                    /*printf("aqui");*/
+                                    /*printf("%d\n", STT->top.);*/
                                     print_stack_tab_sym(STS);
                                     }
 break;
 case 3:
-#line 114 "parser.y"
+#line 127 "parser.y"
 	{typeGBL = yystack.l_mark[0].tipo.type;}
 break;
 case 5:
-#line 115 "parser.y"
+#line 128 "parser.y"
 	{typeGBL= yystack.l_mark[0].tipo.type;}
 break;
 case 7:
-#line 116 "parser.y"
+#line 129 "parser.y"
 	{}
 break;
 case 8:
-#line 121 "parser.y"
+#line 134 "parser.y"
 	{  
                                    }
 break;
 case 9:
-#line 122 "parser.y"
+#line 135 "parser.y"
 	{
                                                     }
 break;
 case 10:
-#line 123 "parser.y"
+#line 136 "parser.y"
 	{
                                                         
                                                     }
 break;
 case 11:
-#line 127 "parser.y"
+#line 140 "parser.y"
 	{baseGBL = yystack.l_mark[0].base.base;}
 break;
 case 12:
-#line 127 "parser.y"
+#line 140 "parser.y"
 	{yyval.tipo.type = yystack.l_mark[0].tipo.type;}
 break;
 case 13:
-#line 130 "parser.y"
+#line 143 "parser.y"
 	{yyval.base.base = getId(getGlobal(STT), "ent");}
 break;
 case 14:
-#line 131 "parser.y"
+#line 144 "parser.y"
 	{yyval.base.base = getId(getGlobal(STT), "real");}
 break;
 case 15:
-#line 132 "parser.y"
+#line 145 "parser.y"
 	{yyval.base.base = getId(getGlobal(STT), "dreal");}
 break;
 case 16:
-#line 133 "parser.y"
+#line 146 "parser.y"
 	{yyval.base.base = getId(getGlobal(STT), "car");}
 break;
 case 17:
-#line 134 "parser.y"
+#line 147 "parser.y"
 	{yyval.base.base = getId(getGlobal(STT), "sin");}
 break;
 case 18:
-#line 139 "parser.y"
+#line 152 "parser.y"
 	{
                                                         if(yystack.l_mark[-2].tipo.type == getId(getGlobal(STT), "ent")){
                                                             int temp_dir = atoi(yystack.l_mark[-2].tipo.dir);
@@ -784,341 +808,325 @@ case 18:
                                                       }
 break;
 case 19:
-#line 154 "parser.y"
+#line 167 "parser.y"
 	{yyval.tipo.type=baseGBL;}
 break;
 case 20:
-#line 160 "parser.y"
+#line 173 "parser.y"
 	{  
-                                char *id = yystack.l_mark[0].tipo.dir;
-                                if(search_SYM(getTopSym(STS), id) == NULL){
-                                    SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
-                                    append_sym(getTopSym(STS), s);/*prueba*/
-                                    dir = dir + getTam(getGlobal(STT), typeGBL);
-                                }else{
-                                    char s[80] = "Ya existe una variable llamada ";
-                                    strcat(s, id);
-                                    yyerror(s);
-                                }
+                                /*printf("%s", $3.dir);*/
+                                agregar_sym_var(yystack.l_mark[0].tipo.dir);
                              }
 break;
 case 21:
-#line 172 "parser.y"
+#line 177 "parser.y"
 	{
-                    char *id = yystack.l_mark[0].tipo.dir;
-                    if(search_SYM(getTopSym(STS), id) == NULL){
-                        SYM *s = crear_sym(id, dir, typeGBL, "var", NULL);
-                        append_sym(getTopSym(STS), s);/*prueba*/
-                        dir = dir + getTam(getGlobal(STT), typeGBL);
-                    }else{
-                        char s[80] = "Ya existe una variable llamada ";
-                        strcat(s, id);
-                        yyerror(s);
-                    }
+                    /*char *id = $1.dir;*/
+                    agregar_sym_var(yystack.l_mark[0].tipo.dir);
                  }
 break;
 case 22:
-#line 188 "parser.y"
+#line 185 "parser.y"
 	{
                         }
 break;
 case 23:
-#line 189 "parser.y"
+#line 186 "parser.y"
 	{
                                                                                         }
 break;
 case 25:
-#line 191 "parser.y"
+#line 188 "parser.y"
 	{}
 break;
 case 26:
-#line 195 "parser.y"
+#line 192 "parser.y"
 	{}
 break;
 case 27:
-#line 196 "parser.y"
+#line 193 "parser.y"
 	{}
 break;
 case 28:
-#line 201 "parser.y"
+#line 198 "parser.y"
 	{ }
 break;
 case 29:
-#line 202 "parser.y"
+#line 199 "parser.y"
 	{ }
 break;
 case 30:
-#line 204 "parser.y"
+#line 201 "parser.y"
 	{
                 }
 break;
 case 31:
-#line 210 "parser.y"
+#line 207 "parser.y"
 	{baseGBL = yystack.l_mark[0].base.base;}
 break;
 case 32:
-#line 210 "parser.y"
+#line 207 "parser.y"
 	{}
 break;
 case 33:
-#line 212 "parser.y"
+#line 209 "parser.y"
 	{}
 break;
 case 34:
-#line 213 "parser.y"
+#line 210 "parser.y"
 	{}
 break;
 case 35:
-#line 216 "parser.y"
+#line 213 "parser.y"
 	{}
 break;
 case 36:
-#line 219 "parser.y"
+#line 216 "parser.y"
 	{}
 break;
 case 37:
-#line 221 "parser.y"
+#line 218 "parser.y"
 	{}
 break;
 case 38:
-#line 222 "parser.y"
+#line 219 "parser.y"
 	{}
 break;
 case 39:
-#line 223 "parser.y"
+#line 220 "parser.y"
 	{}
 break;
 case 40:
-#line 224 "parser.y"
+#line 221 "parser.y"
 	{
                                                                         
                                                                         }
 break;
 case 41:
-#line 227 "parser.y"
+#line 224 "parser.y"
 	{
                                     }
 break;
 case 42:
-#line 230 "parser.y"
+#line 227 "parser.y"
 	{}
 break;
 case 43:
-#line 231 "parser.y"
+#line 228 "parser.y"
 	{}
 break;
 case 44:
-#line 232 "parser.y"
+#line 229 "parser.y"
 	{}
 break;
 case 45:
-#line 233 "parser.y"
+#line 230 "parser.y"
 	{}
 break;
 case 46:
-#line 234 "parser.y"
+#line 231 "parser.y"
 	{}
 break;
 case 47:
-#line 235 "parser.y"
+#line 232 "parser.y"
 	{}
 break;
 case 48:
-#line 239 "parser.y"
+#line 236 "parser.y"
 	{}
 break;
 case 49:
-#line 240 "parser.y"
+#line 237 "parser.y"
 	{}
 break;
 case 50:
-#line 243 "parser.y"
+#line 240 "parser.y"
 	{}
 break;
 case 51:
-#line 244 "parser.y"
+#line 241 "parser.y"
 	{}
 break;
 case 52:
-#line 251 "parser.y"
+#line 248 "parser.y"
 	{
                             }
 break;
 case 53:
-#line 253 "parser.y"
+#line 250 "parser.y"
 	{
                             }
 break;
 case 54:
-#line 255 "parser.y"
+#line 252 "parser.y"
 	{
                     }
 break;
 case 55:
-#line 257 "parser.y"
+#line 254 "parser.y"
 	{
                     }
 break;
 case 56:
-#line 259 "parser.y"
+#line 256 "parser.y"
 	{
                     }
 break;
 case 57:
-#line 261 "parser.y"
+#line 258 "parser.y"
 	{
                 }
 break;
 case 58:
-#line 267 "parser.y"
+#line 264 "parser.y"
 	{ 
                                                 }
 break;
 case 59:
-#line 270 "parser.y"
+#line 267 "parser.y"
 	{
                                         }
 break;
 case 60:
-#line 273 "parser.y"
+#line 270 "parser.y"
 	{
                                         
                                         }
 break;
 case 61:
-#line 277 "parser.y"
+#line 274 "parser.y"
 	{
                                         }
 break;
 case 62:
-#line 280 "parser.y"
+#line 277 "parser.y"
 	{
                                         }
 break;
 case 63:
-#line 283 "parser.y"
+#line 280 "parser.y"
 	{
                                         }
 break;
 case 64:
-#line 286 "parser.y"
+#line 283 "parser.y"
 	{
                     }
 break;
 case 65:
-#line 293 "parser.y"
+#line 290 "parser.y"
 	{
                                     }
 break;
 case 66:
-#line 296 "parser.y"
+#line 293 "parser.y"
 	{
                                       }
 break;
 case 67:
-#line 299 "parser.y"
+#line 296 "parser.y"
 	{
                                     }
 break;
 case 68:
-#line 302 "parser.y"
+#line 299 "parser.y"
 	{
                                     }
 break;
 case 69:
-#line 305 "parser.y"
+#line 302 "parser.y"
 	{ 
                                     }
 break;
 case 70:
-#line 308 "parser.y"
+#line 305 "parser.y"
 	{  }
 break;
 case 71:
-#line 310 "parser.y"
+#line 307 "parser.y"
 	{}
 break;
 case 72:
-#line 312 "parser.y"
+#line 309 "parser.y"
 	{ }
 break;
 case 73:
-#line 313 "parser.y"
+#line 310 "parser.y"
 	{ 
                   }
 break;
 case 74:
-#line 316 "parser.y"
+#line 313 "parser.y"
 	{
                     }
 break;
 case 75:
-#line 326 "parser.y"
+#line 323 "parser.y"
 	{  
              }
 break;
 case 76:
-#line 327 "parser.y"
+#line 324 "parser.y"
 	{ 
                              }
 break;
 case 77:
-#line 333 "parser.y"
+#line 330 "parser.y"
 	{ 
                             }
 break;
 case 78:
-#line 336 "parser.y"
+#line 333 "parser.y"
 	{ 
                        }
 break;
 case 79:
-#line 339 "parser.y"
+#line 336 "parser.y"
 	{ 
 
                                               }
 break;
 case 80:
-#line 349 "parser.y"
+#line 346 "parser.y"
 	{   
                                     }
 break;
 case 81:
-#line 352 "parser.y"
+#line 349 "parser.y"
 	{ 
             }
 break;
 case 82:
-#line 357 "parser.y"
+#line 354 "parser.y"
 	{  
                                 }
 break;
 case 83:
-#line 359 "parser.y"
+#line 356 "parser.y"
 	{  
                                      }
 break;
 case 84:
-#line 364 "parser.y"
+#line 361 "parser.y"
 	{   
                         }
 break;
 case 85:
-#line 366 "parser.y"
+#line 363 "parser.y"
 	{ 
             }
 break;
 case 86:
-#line 371 "parser.y"
+#line 368 "parser.y"
 	{   
                                         }
 break;
 case 87:
-#line 373 "parser.y"
+#line 370 "parser.y"
 	{ 
                        }
 break;
-#line 1122 "y.tab.c"
+#line 1130 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

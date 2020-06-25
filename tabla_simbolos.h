@@ -17,7 +17,8 @@ SYMTAB *pop_st(SSTACK *s) ; // Ejecuta un pop sobre la pila de tablas de simbolo
 void push_st(SSTACK *s,SYMTAB *st) ; // Ingresa una tabla a la pila de tablas de simbolos
 
 ARGS *init_args(); // Retorna el apuntador a un tipo ARGS
-ARG *init_arg(int dato); //Reserva memoria para un tipo ARG y retrona el apuntador
+ARG *init_arg(); //Reserva memoria para un tipo ARG y retrona el apuntador
+ARG *crear_arg(int dato);
 SSTACK *init_sym_tab_stack(); // Reserva memoria para la pila
 SYMTAB *init_sym_tab(); // Reserva memoria para una tabla de simbolos vacia
 SYM *init_sym(); // Reserva memoria para un simbolo vacio
