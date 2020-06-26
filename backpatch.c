@@ -6,11 +6,11 @@
 
 INDEX *init_index() {
     static int indices = 0;
-    char final[6];
+    char *final = (char*)malloc(sizeof(char));
     INDEX *index = (INDEX*)malloc(sizeof(INDEX));
 
     sprintf(final, "i%d", indices++);
-    index->indice =  final; // Tenemos un problema
+    index->indice = final; 
     index->next = NULL;
 
     return index;
@@ -53,15 +53,23 @@ void append_index(LINDEX *list, INDEX *index) {
 }
 
 LINDEX *combinar(LINDEX *list1, LINDEX *list2) {
+    
+    if (list1 == NULL && list2 != NULL)
+        return list2;
+    if (list1 != NULL && list2 == NULL)
+        return list1;
+
     LINDEX *new_list = (LINDEX*)malloc(sizeof(LINDEX));
+
+    if (list1 == NULL && list2 == NULL)
+        return new_list;
 
     list1->tail->next = list2->head;
 
     new_list->head = list1->head;
     new_list->tail = list2->tail;
-
-    finish_list_index(list1);
-    finish_list_index(list2);
+    // finish_list_index(list1);
+    // finish_list_index(list2);
 
     return new_list;
 }
