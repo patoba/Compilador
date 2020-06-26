@@ -17,19 +17,19 @@ extern TSTACK *STT;
  * o la dirección original en caso de que no se realice
  */
 char *ampliar (char *dir, int t1, int t2, CODE *code) {
-    int tipo_min = min(t1, t2);
-    if (t1 == t2 || t2 == tipo_min || tipo_min == -1) 
+    int tipo_max = max(t1, t2);
+    if (t1 == t2 || t1 == tipo_max || tipo_max == -1) 
         return dir;
     else {
         TYPTAB *top = getGlobal(STT);
-        TYP *tipo = search_type(top, tipo_min);
-        char *LPAR = "(";
-        char *RPAR = ")";
+        TYP *tipo = search_type(top, tipo_max);
+        char LPAR[20] = "(";
+        char RPAR[20] = ")";
 
         CUAD *new_quad = init_quad();
         char *new_dir = new_temporal();
 
-        add_data_quad(new_quad, "=", strcat(LPAR, strcat(tipo->nombre, RPAR)), dir, new_dir);
+        add_data_quad(new_quad, ":=", strcat(LPAR, strcat(tipo->nombre, RPAR)), dir, new_dir);
         append_quad(code, new_quad);
 
         return new_dir;
@@ -54,19 +54,19 @@ int es_compatible(int t1, int t2) {
  * o la dirección original en caso de que no se realice
  */
 char *reducir(char *dir, int t1, int t2, CODE *code) {
-    int tipo_max = max(t1, t2);
+    int tipo_min = min(t1, t2);
 
-    if (t1 == t2 || t1 == tipo_max || tipo_max == -1) return dir;
+    if (t1 == t2 || t2 == tipo_min || tipo_min == -1) return dir;
     else {
         TYPTAB *top = getGlobal(STT);
-        TYP  *tipo = search_type(top, tipo_max);
-        char *LPAR = "(";
-        char *RPAR = ")";
+        TYP  *tipo = search_type(top, tipo_min);
+        char LPAR[20] = "(";
+        char RPAR[20] = ")";
 
         CUAD *new_quad = init_quad();
         char *new_dir = new_temporal();
 
-        add_data_quad(new_quad, "=", strcat(LPAR, strcat(tipo->nombre, RPAR)), dir, new_dir);
+        add_data_quad(new_quad, ":=", strcat(LPAR, strcat(tipo->nombre, RPAR)), dir, new_dir);
         append_quad(code, new_quad);
 
         return new_dir;

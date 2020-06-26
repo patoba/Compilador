@@ -20,6 +20,7 @@ void yyerror(char *s);
 //funciones acciones EdT
 void agregar_sym_var(char *id, char *nombre);
 int crear_arreglo(int tipo, int val, int arreglo);
+char *entero_a_string(int i);
 
 //variables globales
 TSTACK *STT;
@@ -299,8 +300,20 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                 CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
                                                 append_quad(code, etiqueta);
                                             } 
-          |  SI e_bool ENTONCES
-            sentencia SINO sentencia FIN{}
+          |  SI e_bool ENTONCES sentencia SINO sentencia FIN{
+                                                                char *L1 = nueva_etiqueta();
+                                                                char *L2 = nueva_etiqueta();
+                                                                backpatch(code, $2.truelist, L1);
+                                                                backpatch(code, $2.falselist, L2);
+                                                                $$.nextlist = combinar($4.nextlist, $6.nextlist);
+                                                                CUAD *etiqueta1 = crear_cuadrupla("etiq", "", "", L1);
+                                                                CUAD *gotoo = crear_cuadrupla("goto", "", "", $4.nextlist->head->indice);
+                                                                CUAD *etiqueta2 = crear_cuadrupla("etiq", "", "", L2);
+                                                                append_quad(code, etiqueta1);
+                                                                append_quad(code, gotoo);
+                                                                append_quad(code, etiqueta2);
+                                                            }
+
           | MIENTRAS e_bool HACER sentencia FIN{}
           | HACER sentencia MIENTRAS e_bool PUNTO_Y_COMA{}
           | SEGUN PAR_ABRE variable PAR_CIERRA HACER casos predeterminado FIN{
@@ -308,11 +321,13 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                                         }
           | variable ASIG expresion PUNTO_Y_COMA{
                                                     if (es_compatible($1.type, $3.type)){  //corregir
-                                                        char *dir = reducir($3.dir, $3.type, $1.type, code);
+                                                        
+                                                        char *dir = reducir($3.dir, $1.type, $3.type, code);
+                                                        
                                                         if($1.code_est){
-                                                            char *temp;//posible falla segmnet fault
-                                                            sprintf(temp, "%d", $1.des);
-                                                            CUAD *acceder = crear_cuadrupla("[]=", temp, dir, $1.dir);
+                                                            //char *new_temp = new_temporal();
+                                                            char *temp = entero_a_string($1.des);//posible falla segmnet faul
+                                                            CUAD *acceder = crear_cuadrupla("[]=", temp, dir, entero_a_string($1.base));
                                                             append_quad(code, acceder);
                                                             //gen($1.base + "[" + $1.des + "]" + "=" + dir);
                                                         }else{
@@ -330,7 +345,7 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
           | DEVOLVER expresion PUNTO_Y_COMA{}
           | DEVOLVER PUNTO_Y_COMA{}
           | TERMINAR PUNTO_Y_COMA{}
-          | INICIO sentencia FIN{};
+          | INICIO sentencias FIN{ $$.nextlist = $2.nextlist; };
 
 //casos.nextlist = lista
 //casos.prueba = lista
@@ -450,6 +465,18 @@ relacional: expresion{
 // EXPRESION.TYPE == ENTERO 
 // EXPRESION.DIR == STRING
 expresion: expresion SUMA expresion {
+                                        if(es_compatible($1.type, $3.type)) {
+                                            $$.type = min($1.type, $3.type);
+                                            strcpy($$.dir, new_temporal());
+                                            char *dir1 = ampliar($1.dir, $1.type, $$.type, code);
+                                            char *dir2 = ampliar($3.dir, $3.type, $$.type, code);
+                                            CUAD *operacion = crear_cuadrupla("+", dir1, dir2, $$.dir);
+                                            append_quad(code, operacion);
+                                        }
+                                        else {
+                                            yyerror("No se puede realizar la operación entre diferentes tipos de datos");
+                                        }
+                                        
                                     }
 
          | expresion RESTA expresion {
@@ -487,17 +514,16 @@ expresion: expresion SUMA expresion {
 // VARIABLE.DES = STRING 
 
 // HAY QUE REVISAR EL ATRIBUTO BASE Y DIR
-variable: ID{  
+variable: ID {  
                 if(buscar_en_pila_sym(STS, $1.dir) != NULL) //posible falle el compilador si la variable no existe
                     IDGBL = $1.dir;
                 else 
                     yyerror("El identificador no existe");
-             }variable_comp  { 
+             } variable_comp  { 
                                 if ($3.code_est) {  //peligroso
                                     strcpy($$.dir, new_temporal());
                                     $$.type = $3.type;   
-                                    char *temp;//posible falla segmnet fault
-                                    sprintf(temp, "%d", $3.des);
+                                    char *temp = entero_a_string($3.des);//posible falla segmnet fault
                                     CUAD *acceder = crear_cuadrupla("[]", $1.dir, temp, $$.dir);
                                     append_quad(code, acceder);
                                     //gen($$.dir + "=" + $1 + "[" + $3.des + "]");
@@ -588,8 +614,7 @@ arreglo: CORCH_ABRE expresion CORCH_CIERRA {
                                                             $$.type = tipo_basado;
                                                             int tam = buscar_en_pila(STT, tipo_basado)->tam;
                                                             strcpy($$.dir, new_temporal());
-                                                            char *tamano_en_cadena;  //posible segment fault
-                                                            sprintf(tamano_en_cadena, "%d", tam);
+                                                            char *tamano_en_cadena = entero_a_string(tam);  //posible segment faul
                                                             CUAD *mult =crear_cuadrupla("*", $2.dir, tamano_en_cadena, $$.dir);
                                                             append_quad(code, mult);
                                                         }else{
@@ -613,8 +638,7 @@ arreglo: CORCH_ABRE expresion CORCH_CIERRA {
                                                                     int tam = buscar_en_pila(STT, typeTemp)->tam;
                                                                     char *dirTemp = new_temporal();
                                                                     strcpy($$.dir, new_temporal());
-                                                                    char *tamano_en_cadena;  //posible segment fault
-                                                                    sprintf(tamano_en_cadena, "%d", tam);
+                                                                    char *tamano_en_cadena = entero_a_string(tam);  //posible segment fault
                                                                     CUAD *mult =crear_cuadrupla("*", $3.dir, tamano_en_cadena, dirTemp);
                                                                     append_quad(code, mult);
                                                                     CUAD *suma =crear_cuadrupla("+", $1.dir, dirTemp, $$.dir);
@@ -677,4 +701,10 @@ int crear_arreglo(int tipo, int val, int arreglo) {
     }else{
         yyerror("El indice debe ser tipo entero\n");
     }
+}
+
+char *entero_a_string(int i) {
+    char *s = (char*)malloc(sizeof(char)*10);
+    sprintf(s, "%d", i);
+    return s;
 }
