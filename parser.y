@@ -11,6 +11,7 @@
 #include "backpatch.h"
 #include "tipos.h"
 #include "pila_dir.h"
+#include "codigo_intermedio.h"
 
 extern int yylex();
 extern int yylineno;
@@ -216,7 +217,8 @@ funciones: DEF tipo ID{
                                                                                         
                                                                                         pop_st(STS);
                                                                                         pop_tt(STT);
-                                                                                        print_code(code);
+                                                                                        //print_code(code);
+                                                                                        ver_codigo_intermedio(code);
                                                         
                                                                                         // if(cmpRet(lista_retorno, $2.type)){
                                                                                         //     L = nueva_etiqueta();
@@ -283,10 +285,14 @@ param_arr: CORCH_ABRE CORCH_CIERRA param_arr{
 
 
 sentencias: sentencias sentencia{
-                                    char *L = nueva_etiqueta();
-                                    backpatch(code, $1.nextlist, L);
-                                    CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
-                                    append_quad(code, etiqueta);
+                                    //no se
+                                    //char *L = nueva_etiqueta();
+                                    //backpatch(code, $1.nextlist, L);
+                                    //CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
+                                    //append_quad(code, etiqueta);
+
+                                    //la de abajo no va
+                                    $$.nextlist = $2.nextlist;
                                 }
             | sentencia{//$$.nextlist = init_code();
                         $$.nextlist = $1.nextlist;

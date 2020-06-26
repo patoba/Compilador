@@ -2,7 +2,7 @@
 
 int igual_cad(char* s1, char* s2);
 
-void codigo_intermedio(CODE *cuadruplas);
+void ver_codigo_intermedio(CODE *cuadruplas);
 
 void ci_op_aritmetico(CUAD *op_arit);
 
