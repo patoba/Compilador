@@ -284,7 +284,8 @@ param_arr: CORCH_ABRE CORCH_CIERRA param_arr{
 
 sentencias: sentencias sentencia{
                                     char *L = nueva_etiqueta();
-                                    backpatch(code, $1.nextlist, L);
+                                    if ($1.nextlist != NULL)
+                                        backpatch(code, $1.nextlist, L);
                                     CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
                                     append_quad(code, etiqueta);
                                 }
@@ -338,6 +339,7 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                     }else{
                                                         yyerror("No se puede realizar el cast");
                                                     }
+                                                    $$.nextlist = NULL;
                                                 } 
 
           | ESCRIBIR expresion PUNTO_Y_COMA{}
@@ -392,7 +394,7 @@ e_bool: e_bool O e_bool{
         | VERDADERO {
                         INDEX *i0 = init_index();
                         $$.truelist = init_list_index(i0);
-                        CUAD *cuad = crear_cuadrupla("goto", "", "", i0->indice);
+                        CUAD *cuad = crear_cuadrupla("goto", "", "", i0->indice );
                         append_quad(code, cuad);
                     }
         | FALSO {
