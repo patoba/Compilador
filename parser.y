@@ -344,6 +344,7 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                     }else{
                                                         yyerror("No se puede realizar el cast");
                                                     }
+                                                    $$.nextlist = NULL;
                                                 } 
 
           | ESCRIBIR expresion PUNTO_Y_COMA{}
@@ -398,7 +399,7 @@ e_bool: e_bool O e_bool{
         | VERDADERO {
                         INDEX *i0 = init_index();
                         $$.truelist = init_list_index(i0);
-                        CUAD *cuad = crear_cuadrupla("goto", "", "", i0->indice);
+                        CUAD *cuad = crear_cuadrupla("goto", "", "", i0->indice );
                         append_quad(code, cuad);
                     }
         | FALSO {
