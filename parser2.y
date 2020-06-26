@@ -642,7 +642,8 @@ parametros: lista_param {   $$.lista = $1.lista;
 
 // LISTA_PARAM.LISTA == LISTA 
 // LISTA_PARAM.NUM == ENTERO
-lista_param: lista_param COMA expresion {   $$.lista = $1.lista;   
+lista_param: lista_param COMA expresion {   
+                                            $$.lista = $1.lista;   
                                             $$.lista.push_back($3.type);
                                             $$.num = $1.num + 1;
                                         }

@@ -75,6 +75,9 @@ LINDEX *combinar(LINDEX *list1, LINDEX *list2) {
 }
 
 void backpatch(CODE *code, LINDEX *list, char *label) {
+    if (list == NULL) 
+        return;
+
     CUAD  *temp_quad = code->head;
     INDEX *temp_index;
     
@@ -95,7 +98,7 @@ char *new_temporal() {
     char *final = (char *)malloc(sizeof(char) * 6);
 
     sprintf(final, "t%d", temp++);
-
+    
     return final;
 }
 
