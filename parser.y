@@ -104,7 +104,7 @@ CODE *code;
 %type<base> base
 %type<lista_indices> predeterminado casos relacional_op e_bool sentencia sentencias 
 
-%nonassoc SIX
+%nonassoc SIT
 %nonassoc SINO
 
 %start programa
