@@ -1,24 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cuadruplas.h"
 
 CUAD *init_quad() {
     CUAD *new_quad = (CUAD*)malloc(sizeof(CUAD));
     new_quad->op   = NULL;
-    new_quad->arg1 = NULL;
-    new_quad->arg2 = NULL;
     new_quad->next = NULL;
-    new_quad->res  = NULL;
 
     return new_quad;
 }
 
 void add_data_quad(CUAD *quad, char *op, char *arg1, char *arg2, char *res) {
     quad->op = op;
-    quad->arg1 = arg1;
-    quad->arg2 = arg2;
-    quad->res = res;
+    strcpy(quad->arg1, arg1);
+    strcpy(quad->arg2, arg2);
+    strcpy(quad->res, res);
+}
+
+CUAD *crear_cuadrupla(char *op, char *arg1, char *arg2, char *res) {
+    CUAD *new_quad = init_quad();
+    add_data_quad(new_quad, op, arg1, arg2, res);
+    return new_quad;
 }
 
 void finish_quad(CUAD *quad){

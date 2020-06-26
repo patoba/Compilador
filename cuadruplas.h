@@ -5,9 +5,9 @@ typedef struct cuad CUAD;
 
 struct cuad{
 	char *op;
-	char *arg1;
-	char *arg2;
-	char *res;
+	char arg1[50];
+	char arg2[50];
+	char res[50];
 	CUAD *next;
 };
 

@@ -59,13 +59,13 @@ CODE *code;
     struct {
         struct list_index *truelist;
         struct list_index *falselist;
-        struct list_index *nexlist;
+        struct list_index *nextlist;
         struct list_index *prueba;
     } lista_indices;
 }
 
 //PALABRAS RESERVADAS
-%token ESTRUCTURA INICIO FIN DEF SI ENTONCES SINO MIENTRAS HACER SEGUN ESCRIBIR LEER DEVOLVER TERMINAR CASO PRED
+%token ESTRUCTURA INICIO FIN DEF SI ENTONCES MIENTRAS HACER SEGUN ESCRIBIR LEER DEVOLVER TERMINAR CASO PRED
 
 //TIPOS DE DATOS
 %token ENT REAL DREAL CAR SIN
@@ -104,6 +104,9 @@ CODE *code;
 %type<base> base
 %type<lista_indices> predeterminado casos relacional_op e_bool sentencia sentencias 
 
+%nonassoc SIX
+%nonassoc SINO
+
 %start programa
 
 %%
@@ -112,6 +115,7 @@ programa: {
             
             STS = init_sym_tab_stack();
             STT = init_type_tab_stack();
+            code = init_code();
             
             TYPTAB *global = init_type_tab_global();
             push_tt(STT, global);
@@ -199,8 +203,10 @@ funciones: DEF tipo ID{
                         }
                       } PAR_ABRE argumentos{print_stack_tab_sym(STS);
                                             print_stack_tab_type(STT);} PAR_CIERRA INICIO declaraciones sentencias{
+                                                                                        
                                                                                         pop_st(STS);
                                                                                         pop_tt(STT);
+                                                                                        print_code(code);
                                                         
                                                                                         // if(cmpRet(lista_retorno, $2.type)){
                                                                                         //     L = nueva_etiqueta();
@@ -266,18 +272,24 @@ param_arr: CORCH_ABRE CORCH_CIERRA param_arr{
          | { $$.type = baseGBL; };
 
 
-sentencias: sentencias sentencia{char *L = nueva_etiqueta();
-                                backpatch($1.nextlist, L);
-                                gen(L);}//gen no esta definido
+sentencias: sentencias sentencia{
+                                    char *L = nueva_etiqueta();
+                                    backpatch(code, $1.nextlist, L);
+                                    CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
+                                    append_quad(code, etiqueta);
+                                }
             | sentencia{//$$.nextlist = init_code();
-                        $$.nextlist = $1.nextlist
+                        $$.nextlist = $1.nextlist;
                         //sentencias.code = sentencia.code
                         };
 
-sentencia:  SI e_bool ENTONCES sentencia FIN{ char *L = nueva_etiqueta();
-                                              backpatch($2.truelist, L)
-                                              $$.nextlist = combinar($2.falselist, $4.nextlist);
-                                              gen(L);}
+sentencia:  SI e_bool ENTONCES sentencia FIN{ 
+                                                char *L = nueva_etiqueta();
+                                                backpatch(code, $2.truelist, L);
+                                                $$.nextlist = combinar($2.falselist, $4.nextlist);
+                                                CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
+                                                append_quad(code, etiqueta);
+                                            } %prec SIX
           |  SI e_bool ENTONCES
             sentencia SINO sentencia FIN{}
           | MIENTRAS e_bool HACER sentencia FIN{}
@@ -307,17 +319,26 @@ predeterminado: PRED DOS_PUNTOS sentencia{}
 //e_bool.truelist = lista
 //e_bool.falselist = lista
 //e_bool.code = string
-//relacional.truelist = lista
+//relacional.truelist = lista_indices
 //relacional.falselist = lista
 e_bool: e_bool O e_bool{
-                            }
+                            char *L = nueva_etiqueta();
+                            backpatch(code, $1.falselist, L);
+                            $$.truelist = combinar($1.truelist, $3.truelist);
+                            $$.falselist = $3.falselist;
+                            CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
+                            append_quad(code, etiqueta);
+                       }
+
         |e_bool Y e_bool{
                             }
         |NO e_bool{
                     }
-        |relacional_op{$$.truelist = $1.truelist;
-                    $$.falselist = $1.falselist;
+        |relacional_op{
+                        $$.truelist = $1.truelist;
+                        $$.falselist = $1.falselist;
                     }
+
         |VERDADERO{INDEX *i0 = init_index();
                     $$.truelist = init_list_index(i0);
                     CUAD *cuad = crear_cuadrupla("", "", "", i0.indice);
@@ -345,15 +366,23 @@ relacional_op: relacional MAYOR_QUE relacional{
                                         }
 
             | relacional DIFER relacional{
-                                        }
+                                         }
 
-            |relacional IGUAL relacional{
+            | relacional IGUAL relacional{
+                                            INDEX *i0 = init_index(); 
+                                            INDEX *i1 = init_index();
+                                            $$.truelist=init_list_index(i0);
+                                            $$.falselist=init_list_index(i1);
+                                            CUAD *si = crear_cuadrupla("==", $1.dir, $3.dir, i0->indice);
+                                            CUAD *gotoo = crear_cuadrupla("goto", "", "", i1->indice);
+                                            append_quad(code, si);
+                                            append_quad(code, gotoo);
                                         };
 
 relacional: expresion{
-                    };
-
-
+                        $$.type = $1.type;
+                        strcpy($$.dir, $1.dir);
+                     };
 
 // EXPRESION.TYPE == ENTERO 
 // EXPRESION.DIR == STRING
@@ -376,7 +405,11 @@ expresion: expresion SUMA expresion {
 
          | variable {}
 
-         | NUM { }
+         | NUM { 
+                    $$.type = $1.type; 
+                    strcpy($$.dir, $1.dir); 
+               }
+
          | CADENA { 
                   }
 
