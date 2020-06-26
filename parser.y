@@ -28,7 +28,7 @@ int dir;
 int typeGBL, baseGBL;
 SDir *SDIR;
 CODE *code;
-
+char *IDGBL;
 //vector<int> SDir;
 %}
 
@@ -38,6 +38,14 @@ CODE *code;
         struct args *lista;
         int num;
     } lista;
+
+    struct {
+        int type;
+        int estructura;
+        int des;
+        struct sym_tab *tabla;
+        int code_est;
+    } estructura;
 
     struct {
         int type;
@@ -99,7 +107,7 @@ CODE *code;
 %type<lista> lista_arg lista_param parametros argumentos
 %type<tipo> expresion arreglo param_arr arg tipo_arreglo tipo_arg
 %type<tipo> tipo_registro declaraciones relacional tipo 
-//%type<estructura> dato_est_sim variable_comp
+%type<estructura> dato_est_sim variable_comp
 %type<variable> variable
 %type<base> base
 %type<lista_indices> predeterminado casos relacional_op e_bool sentencia sentencias 
@@ -298,11 +306,16 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                                         
                                                                         }
           | variable ASIG expresion PUNTO_Y_COMA{
-                                                    dir = reducir($3.dir, $3.type, $1.type);
-                                                    if($1.code_est){
-                                                        gen($1.base + "[" + $1.des + "]" + "=" + dir);
+                                                    if (es_compatible(t1, t2)){
+                                                        char *dir = reducir($3.dir, $3.type, $1.type);
+                                                        if($1.code_est){
+                                                            gen($1.base + "[" + $1.des + "]" + "=" + dir);
+                                                        }else{
+                                                            gen($1.dir + "=" + dir);
+                                                        }
                                                     }else{
-                                                        gen($1.dir + "=" + dir);
+                                                        yyerror("No se puede realizar el cast");
+                                                        return NULL;
                                                     }
                                                 } 
 
@@ -468,16 +481,38 @@ expresion: expresion SUMA expresion {
 
 // HAY QUE REVISAR EL ATRIBUTO BASE Y DIR
 variable: ID{  
+                if(buscar_en_pila_sym(STS, $1.dir) != NULL) //posible falle el compilador si la variable no existe
+                    IDGBL = $1.dir;
+                else 
+                    error("El identificador no existe");
              }variable_comp  { 
+                                if ($3.code_est) {  //peligroso
+                                    $$.dir = nueva_temporal();
+                                    $$.type = $3.type;
+                                    gen($$.dir + "=" + $1 + "(" + $3.des + ")");
+                                    $$.base = $1.dir; // ??? ENTERO = STRING
+                                    $$.code_est = true;
+                                    $$.des = $3.des;
+                                }else {
+                                    $$.dir = $1; // ???
+                                    $$.type = STS.get_cima().get_tipo($1);
+                                    $$.code_est = false;
+                                }
                              };
 
 // VARIABLE_COMP.TYPE == ENTERO 
 // VARIABLE_COMP.DES == STRING
 // VARIABLE_COMP.CODE_EST == BOOL
 variable_comp: dato_est_sim { 
+                              $$.type = $1.type; 
+                              $$.des = $1.des;
+                              $$.code_est = $1.code_est;
                             }
 
              | arreglo { 
+                         $$.type = $1.type;
+                         $$.des = $1.dir;
+                         $$.code_est = 1;
                        }
 
              | PAR_ABRE parametros PAR_CIERRA { 
@@ -490,18 +525,99 @@ variable_comp: dato_est_sim {
 // DATO_EST_SIM.TABLA == TABLA
 
 // DE DONDE SALE ID SI ES UNA PRODUCCION VACIA
-dato_est_sim: dato_est_sim PUNTO ID {   
+dato_est_sim: dato_est_sim PUNTO ID {  //muy PELIGROSO
+                                        if ($1.estructura) {
+                                            SYM *s = search_SYM($1.tabla, $3.dir);//hay que copiar todos
+                                            if(s != NULL) {
+                                                $$.des = $1.des + s->dir; //??? tabla_1 $1 o $$
+                                                int typeTemp = s->tipo;
+                                                TYP *estTemp = search_type($1.tabla->tt_asoc, typeTemp); //aqui truena, por no copiar todo
+                                                if(estTemp == NULL)
+                                                    search_type(getGlobal(STT), typeTemp);   
+                                                if (es_estructura(estTemp)) { 
+                                                    $$.estructura = 1;
+                                                    $$.tabla = $$.tabla->tt_asoc->tipo.est; 
+                                                }else {
+                                                    $$.estructura = 0;
+                                                    $$.tabla = NULL;
+                                                    $$.type = s->id;
+                                                }
+                                                $$.code_est = 1;
+                                            }else {
+                                                yyerror("No existe la variable en la tabla de tipos asociada a la estructura");
+                                            }
+                                        }else {
+                                            yyerror("La variable no pertenece a un tipo estructura");
+                                        }  
                                     }
-                                
             | { 
+                SYM *typeTemp = buscar_en_pila_sym(STS, IDGBL); 
+                TYP *tipo_asoc = buscar_en_pila(STT, typeTemp->tipo);
+                if (es_estructura(tipo_asoc)) { 
+                    $$.estructura = 1;//int
+                    $$.tabla = tipo_asoc->tipo.est; //TablaSimbolos
+                    $$.des = 0;   //direccion (entero)
+                }
+                else {
+                    $$.estructura = 0;
+                    $$.type = tipo_asoc->id; 
+                }
+                $$.code_est = 0;
             };
 
 // ARREGLO.TYPE == ENTERO 
 // ARREGLO.DIR == STRING
-arreglo: CORCH_ABRE expresion CORCH_CIERRA {  
-                                }
+arreglo: CORCH_ABRE expresion CORCH_CIERRA {
+                                                TYP *temp_type = buscar_en_pila_sym(STS, IDGBL);
+                                                $$.type = temp_type->id;
+                                                if (es_arreglo(temp_type)) { 
+                                                    if($2.type == getId(getGlobal(STT), "ent")) {
+                                                        if(atoi($2.dir) > 0){  //Posible falla por $2.dir es string
+                                                            int tipo_basado = temp_type->tipo.tipo;
+                                                            int tam = buscar_en_pila(STT, tipo_basado);
+                                                            $$.dir = nueva_temporal();
+                                                            char *tamano_en_cadena;  //posible segment fault
+                                                            sprintf(tamano_en_cadena, "%d", tam);
+                                                            CUAD *mult =crear_cuadrupla("*", $2.dir, tamano_en_cadena, $$.dir);
+                                                            append_quad(code, mult);
+                                                        }else{
+                                                            yyerror("El indice debe ser positivo");
+                                                        }
+                                                    } else {
+                                                        yyerror("El indice debe ser un entero");
+                                                    }
+                                                } else {
+                                                    yyerror("No se ha declarado el arreglo");
+                                                }  
+                                            }
        | arreglo CORCH_ABRE expresion CORCH_CIERRA {  
-                                     };
+                                                        TYP *temp_type = buscar_en_pila_sym(STS, $1.type);
+                                                        $$.type = temp_type->id;
+                                                        if (es_arreglo(temp_type)) {
+                                                            if ($3.type == getId(getGlobal(STT), "ent")){
+                                                                if(atoi($3.dir) > 0){
+                                                                    int typeTemp = temp_type->tipo.tipo;
+                                                                    int tam = buscar_en_pila(STT, tipo_basado);
+                                                                    char *dirTemp = nueva_temporal();
+                                                                    $$.dir = nueva_temporal();
+                                                                    char *tamano_en_cadena;  //posible segment fault
+                                                                    sprintf(tamano_en_cadena, "%d", tam);
+                                                                    CUAD *mult =crear_cuadrupla("*", $3.dir, tamano_en_cadena, dirTemp);
+                                                                    append_quad(code, mult);
+                                                                    CUAD *suma =crear_cuadrupla("+", $1.dir, dirTemp, $$.dir);
+                                                                    append_quad(code, suma);
+                                                                }else{
+                                                                    yyerror("El indice debe ser mayor a cero")
+                                                                }
+                                                            }
+                                                            else {
+                                                                yyerror("El índice del arreglo debe ser entero");
+                                                            }
+                                                        }
+                                                        else {
+                                                            yyerror("La variable no es un arreglo"); // ???
+                                                        }
+                                                  };
 
 // PARAMETROS.LISTA = LISTA
 // PARAMETROS.NUM = ENTERO

@@ -264,3 +264,11 @@ int tamano_tabla_tipos(SYMTAB *st, TSTACK *s){
     }
     return tam;
 }
+
+int es_estructura(TYP *tipo){
+    return tipo->tb->is_est == 1;
+}
+
+int es_arreglo(TYP *tipo){
+    return tipo->tb->is_est == 0;
+}

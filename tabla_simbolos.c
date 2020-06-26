@@ -345,6 +345,20 @@ void finish_sym_tab_stack(SSTACK *st){
 }
 //---------------------------------------------------------------------------------------
 
+
+SYM *buscar_en_pila_sym(SSTACK *s, char *id){
+    if(s==NULL || s->top == NULL)
+        return NULL;
+    SYMTAB *temp = s->top;
+    while(temp != NULL){
+        SYM *encontrado = search_SYM(temp, id);
+        if(encontrado != NULL)
+            return encontrado;
+        temp = (*temp).next;
+    }
+    return NULL;
+}
+
 /* int getDir(SYMTAB *T , char *id){
 
 

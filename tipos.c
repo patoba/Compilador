@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#define FALSE 0
+#define TRUE 1
 #include "tipos.h"
 #include "cuadruplas.h"
 #include "tabla_tipos.h"
@@ -17,10 +18,10 @@ extern TSTACK *STT;
  */
 char *ampliar (char *dir, int t1, int t2, CODE *code) {
     int tipo_min = min(t1, t2);
-    
-    if (t1 == t2 || t2 == tipo_min || tipo_min == -1) return dir;
+    if (t1 == t2 || t2 == tipo_min || tipo_min == -1) 
+        return dir;
     else {
-        TYPTAB *top = getTopType(STT);
+        TYPTAB *top = getGlobal(STT);
         TYP *tipo = search_type(top, tipo_min);
         char *LPAR = "(";
         char *RPAR = ")";
@@ -35,6 +36,16 @@ char *ampliar (char *dir, int t1, int t2, CODE *code) {
     }
 }
 
+int es_compatible(int t1, int t2) {
+    if(t1 < 1 || t1 > 4 || t2 < 1 || t2 > 4) 
+        return FALSE;
+    else if (t1 == 3 && t2 == 2 || t1 == 2 && t2 == 3) 
+        return FALSE;
+    else if (t1 == 4 && t2 == 2 || t1 == 2 && t2 == 4)
+        return FALSE;
+    return TRUE;
+}
+
 /*
  * Recibe dos tipos, cada uno es su índice hacia la tabla de tipos en la cima de la pila
  * Si el primero es más grande que el segundo, genera la cuádrupla
@@ -47,7 +58,7 @@ char *reducir(char *dir, int t1, int t2, CODE *code) {
 
     if (t1 == t2 || t1 == tipo_max || tipo_max == -1) return dir;
     else {
-        TYPTAB *top = getTopType(STT);
+        TYPTAB *top = getGlobal(STT);
         TYP  *tipo = search_type(top, tipo_max);
         char *LPAR = "(";
         char *RPAR = ")";
@@ -69,7 +80,7 @@ char *reducir(char *dir, int t1, int t2, CODE *code) {
 int max(int t1, int t2) {
     if (t1 == t2) return t1;
 
-    TYPTAB *top = getTopType(STT);
+    TYPTAB *top = getGlobal(STT);
 
     TYP *tipo1 = search_type(top, t1);
     TYP *tipo2 = search_type(top, t2);
@@ -91,7 +102,7 @@ int max(int t1, int t2) {
 int min(int t1, int t2) {
     if (t1 == t2) return t1;
 
-    TYPTAB *top = getTopType(STT);
+    TYPTAB *top = getGlobal(STT);
 
     TYP *tipo1 = search_type(top, t1);
     TYP *tipo2 = search_type(top, t2);

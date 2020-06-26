@@ -55,8 +55,7 @@ SYM *search_SYM(SYMTAB *T, char *id);
 
 //--------------------------------------------------------------------------------------
 
-
-
+SYM *buscar_en_pila_sym(SSTACK *, char *);
 
 /*int getDir(SYMTAB *T , char *id);
 int getTipo(SYMTAB *T , char *id);

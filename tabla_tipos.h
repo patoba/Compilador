@@ -40,3 +40,6 @@ void print_stack_tab_type(TSTACK *s );//Imprime stack de tablas de simbolos
 
 int tamano_tabla_tipos(SYMTAB *, TSTACK *s);
 TYP *buscar_en_pila(TSTACK *s, int id);
+
+int es_estructura(TYP *tipo);
+int es_arreglo(TYP *tipo);

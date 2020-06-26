@@ -33,4 +33,6 @@ int max(int t1, int t2);
  */
 int min(int t1, int t2);
 
+int es_compatible(int t1, int t2);
+
 #endif
