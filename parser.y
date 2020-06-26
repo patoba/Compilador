@@ -370,22 +370,36 @@ e_bool: e_bool O e_bool{
                             append_quad(code, etiqueta);
                        }
 
-        |e_bool Y e_bool{
-                            }
-        |NO e_bool{
+        | e_bool Y e_bool {
+                            char *L = nueva_etiqueta();
+                            backpatch(code, $1.truelist, L);
+                            $$.truelist = $3.truelist;
+                            $$.falselist = combinar($1.falselist, $3.falselist);
+                            CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
+                            append_quad(code, etiqueta);
+                          }
+
+        | NO e_bool {
+                        $$.truelist =$2.falselist;
+                        $$.falselist = $2.truelist;
                     }
+
         |relacional_op{
                         $$.truelist = $1.truelist;
                         $$.falselist = $1.falselist;
                     }
 
-        |VERDADERO{INDEX *i0 = init_index();
-                    $$.truelist = init_list_index(i0);
-                    CUAD *cuad = crear_cuadrupla("", "", "", "");
-                    append_quad(code, cuad);
-                    //gen("goto " + i0);
+        | VERDADERO {
+                        INDEX *i0 = init_index();
+                        $$.truelist = init_list_index(i0);
+                        CUAD *cuad = crear_cuadrupla("goto", "", "", i0->indice);
+                        append_quad(code, cuad);
                     }
-        |FALSO{
+        | FALSO {
+                    INDEX *i0 = init_index();
+                    $$.falselist = init_list_index(i0);
+                    CUAD *cuad = crear_cuadrupla("goto", "", "", i0->indice);
+                    append_quad(code, cuad);
                 };
 
 //relacional.truelist=nueva_lista_indice(t0)
@@ -476,25 +490,73 @@ expresion: expresion SUMA expresion {
                                         else {
                                             yyerror("No se puede realizar la operación entre diferentes tipos de datos");
                                         }
-                                        
                                     }
 
          | expresion RESTA expresion {
-                                      }
+                                        if(es_compatible($1.type, $3.type)) {
+                                            $$.type = min($1.type, $3.type);
+                                            strcpy($$.dir, new_temporal());
+                                            char *dir1 = ampliar($1.dir, $1.type, $$.type, code);
+                                            char *dir2 = ampliar($3.dir, $3.type, $$.type, code);
+                                            CUAD *operacion = crear_cuadrupla("-", dir1, dir2, $$.dir);
+                                            append_quad(code, operacion);
+                                        }
+                                        else {
+                                            yyerror("No se puede realizar la operación entre diferentes tipos de datos");
+                                        }
+                                     }
 
          | expresion MULT expresion {
+                                        if(es_compatible($1.type, $3.type)) {
+                                            $$.type = min($1.type, $3.type);
+                                            strcpy($$.dir, new_temporal());
+                                            char *dir1 = ampliar($1.dir, $1.type, $$.type, code);
+                                            char *dir2 = ampliar($3.dir, $3.type, $$.type, code);
+                                            CUAD *operacion = crear_cuadrupla("*", dir1, dir2, $$.dir);
+                                            append_quad(code, operacion);
+                                        }
+                                        else {
+                                            yyerror("No se puede realizar la operación entre diferentes tipos de datos");
+                                        }
                                     }
 
          | expresion DIV expresion {
-                                    }
+                                        if(es_compatible($1.type, $3.type)) {
+                                            $$.type = min($1.type, $3.type);
+                                            strcpy($$.dir, new_temporal());
+                                            char *dir1 = ampliar($1.dir, $1.type, $$.type, code);
+                                            char *dir2 = ampliar($3.dir, $3.type, $$.type, code);
+                                            CUAD *operacion = crear_cuadrupla("/", dir1, dir2, $$.dir);
+                                            append_quad(code, operacion);
+                                        }
+                                        else {
+                                            yyerror("No se puede realizar la operación entre diferentes tipos de datos");
+                                        }
+                                   }
 
-         | expresion MOD expresion { 
-                                    }
+         | expresion MOD expresion {
+                                        if($1.type == 1 && $3.type == 1) {
+                                            $$.type = max($1.type, $3.type);
+                                            strcpy($$.dir, new_temporal());
+                                            char *dir1 = ampliar($1.dir, $1.type, $$.type, code);
+                                            char *dir2 = ampliar($3.dir, $3.type, $$.type, code);
+                                            CUAD *operacion = crear_cuadrupla("%", dir1, dir2, $$.dir);
+                                            append_quad(code, operacion);
+                                        }
+                                        else {
+                                            yyerror("El módulo solo puede operar con números enteros");
+                                        }
+                                   }
 
-         | PAR_ABRE expresion PAR_CIERRA {  }
+         | PAR_ABRE expresion PAR_CIERRA {  
+                                            $$.type = $2.type; 
+                                            strcpy($$.dir, $2.dir);
+                                         }
 
-         | variable { $$.type = $1.type; 
-                      strcpy($$.dir, $1.dir);}
+         | variable { 
+                      $$.type = $1.type; 
+                      strcpy($$.dir, $1.dir);
+                    }
 
          | NUM { 
                     $$.type = $1.type; 
@@ -659,15 +721,25 @@ arreglo: CORCH_ABRE expresion CORCH_CIERRA {
 // PARAMETROS.LISTA = LISTA
 // PARAMETROS.NUM = ENTERO
 parametros: lista_param {   
+                            $$.lista = $1.lista;
+                            $$.num = $1.num;
                         }
           | { 
+              $$.lista = NULL;
+              $$.num = 0;
             };
 
 // LISTA_PARAM.LISTA == LISTA 
 // LISTA_PARAM.NUM == ENTERO
 lista_param: lista_param COMA expresion {   
+                                            $$.lista = $1.lista;   
+                                            append_arg($$.lista, $3.type);
+                                            $$.num = $1.num + 1;
                                         }
            | expresion { 
+                            $$.lista = init_args();
+                            append_arg($$.lista, $1.type);
+                            $$.num = 1;
                        };
 
 %%

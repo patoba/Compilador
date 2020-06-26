@@ -7,7 +7,7 @@ def sin imc(ent edad, ent altura) inicio
     ent[2][3] a;
     ent p_imc;
 
-    p_imc := edad + altura;
+    p_imc := edad % altura;
 
     persona.altura := 2;
     persona.edad := 2.4f;
