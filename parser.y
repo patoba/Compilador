@@ -298,7 +298,13 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                                         
                                                                         }
           | variable ASIG expresion PUNTO_Y_COMA{
-                                    } 
+                                                    dir = reducir($3.dir, $3.type, $1.type);
+                                                    if($1.code_est){
+                                                        gen($1.base + "[" + $1.des + "]" + "=" + dir);
+                                                    }else{
+                                                        gen($1.dir + "=" + dir);
+                                                    }
+                                                } 
 
           | ESCRIBIR expresion PUNTO_Y_COMA{}
           | LEER variable PUNTO_Y_COMA{}
@@ -352,19 +358,58 @@ e_bool: e_bool O e_bool{
 //relacional.falselist=nueva_lista_indice(t1)
 //relacional.code
 relacional_op: relacional MAYOR_QUE relacional{ 
-                                                }
+                                                INDEX *i0 = init_index(); 
+                                                INDEX *i1 = init_index();
+                                                $$.truelist=init_list_index(i0);
+                                                $$.falselist=init_list_index(i1);
+                                                CUAD *si = crear_cuadrupla(">", $1.dir, $3.dir, i0->indice);
+                                                CUAD *gotoo = crear_cuadrupla("goto", "", "", i1->indice);
+                                                append_quad(code, si);
+                                                append_quad(code, gotoo);
+                                              }
 
             | relacional MENOR_QUE relacional{
-                                        }
+                                                INDEX *i0 = init_index(); 
+                                                INDEX *i1 = init_index();
+                                                $$.truelist=init_list_index(i0);
+                                                $$.falselist=init_list_index(i1);
+                                                CUAD *si = crear_cuadrupla("<", $1.dir, $3.dir, i0->indice);
+                                                CUAD *gotoo = crear_cuadrupla("goto", "", "", i1->indice);
+                                                append_quad(code, si);
+                                                append_quad(code, gotoo);
+                                             }
 
-            |relacional MENOR_IGUAL_QUE relacional{
-                                        
-                                        }
+            | relacional MENOR_IGUAL_QUE relacional{
+                                                    INDEX *i0 = init_index(); 
+                                                    INDEX *i1 = init_index();
+                                                    $$.truelist=init_list_index(i0);
+                                                    $$.falselist=init_list_index(i1);
+                                                    CUAD *si = crear_cuadrupla("<=", $1.dir, $3.dir, i0->indice);
+                                                    CUAD *gotoo = crear_cuadrupla("goto", "", "", i1->indice);
+                                                    append_quad(code, si);
+                                                    append_quad(code, gotoo);
+                                                  }
 
-            |relacional MAYOR_IGUAL_QUE relacional{
-                                        }
+            | relacional MAYOR_IGUAL_QUE relacional{
+                                                    INDEX *i0 = init_index(); 
+                                                    INDEX *i1 = init_index();
+                                                    $$.truelist=init_list_index(i0);
+                                                    $$.falselist=init_list_index(i1);
+                                                    CUAD *si = crear_cuadrupla(">=", $1.dir, $3.dir, i0->indice);
+                                                    CUAD *gotoo = crear_cuadrupla("goto", "", "", i1->indice);
+                                                    append_quad(code, si);
+                                                    append_quad(code, gotoo);
+                                                  }
 
             | relacional DIFER relacional{
+                                            INDEX *i0 = init_index(); 
+                                            INDEX *i1 = init_index();
+                                            $$.truelist=init_list_index(i0);
+                                            $$.falselist=init_list_index(i1);
+                                            CUAD *si = crear_cuadrupla("<>", $1.dir, $3.dir, i0->indice);
+                                            CUAD *gotoo = crear_cuadrupla("goto", "", "", i1->indice);
+                                            append_quad(code, si);
+                                            append_quad(code, gotoo);
                                          }
 
             | relacional IGUAL relacional{

@@ -48,7 +48,7 @@ char *reducir(char *dir, int t1, int t2, CODE *code) {
     if (t1 == t2 || t1 == tipo_max || tipo_max == -1) return dir;
     else {
         TYPTAB *top = getTopType(STT);
-        TYP *tipo = search_type(top, tipo_max);
+        TYP  *tipo = search_type(top, tipo_max);
         char *LPAR = "(";
         char *RPAR = ")";
 
