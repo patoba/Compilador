@@ -320,10 +320,11 @@ e_bool: e_bool O e_bool{
                     }
         |VERDADERO{INDEX *i0 = init_index();
                     $$.truelist = init_list_index(i0);
-                    CUAD *cuad = crear_cuadrupla("", "", "", "");
+                    CUAD *cuad = crear_cuadrupla("", "", "", i0.indice);
                     append_quad(code, cuad);
                     //gen("goto " + i0);
                     }
+
         |FALSO{
                 };
 

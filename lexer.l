@@ -19,9 +19,8 @@ op_rel_diferente "<>"
 digito [0-9]
 entero ({digito})+
 exp [Ee][+-]?{entero}
-real (({digito})*.({digito})+|({digito})+"."({digito}})*)({exp}?)|({entero}{exp})
+real ({digito})*"."({digito})+|({digito})+"."({digito})*
 flotante ({real}{exp}?|{entero}{exp})[Ff]
-num {entero}
 id [a-zA-Z_][a-zA-Z_0-9]*
 caracter "'"[c\c]"'"
 cadena "\""[c\c]*"\""
@@ -138,18 +137,30 @@ cadena "\""[c\c]*"\""
 <INITIAL>"%" {
     return MOD;
 }
-<INITIAL>{num} {
+<INITIAL>{entero} {
     strcpy(yylval.tipo.dir, yytext);
     yylval.tipo.type = 1;
+    return NUM;
+}
+<INITIAL>{caracter} {
+    strcpy(yylval.tipo.dir, yytext);
+    yylval.tipo.type = 2;
+    return CARACTER;
+}
+<INITIAL>{flotante} {
+    strcpy(yylval.tipo.dir, yytext);
+    yylval.tipo.type = 3;
+    return NUM;
+}
+<INITIAL>{real} {
+    strcpy(yylval.tipo.dir, yytext);
+    yylval.tipo.type = 4;
     return NUM;
 }
 <INITIAL>{cadena} {
     return CADENA;
 }
-<INITIAL>{caracter} {
-    
-    return CARACTER;
-}
+
 <INITIAL>"verdadero" {
     return VERDADERO;
 }
