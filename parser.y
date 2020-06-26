@@ -283,13 +283,13 @@ sentencias: sentencias sentencia{
                         //sentencias.code = sentencia.code
                         };
 
-sentencia:  SI e_bool ENTONCES sentencia FIN{ 
+sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{ 
                                                 char *L = nueva_etiqueta();
                                                 backpatch(code, $2.truelist, L);
                                                 $$.nextlist = combinar($2.falselist, $4.nextlist);
                                                 CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
                                                 append_quad(code, etiqueta);
-                                            } %prec SIX
+                                            } 
           |  SI e_bool ENTONCES
             sentencia SINO sentencia FIN{}
           | MIENTRAS e_bool HACER sentencia FIN{}
