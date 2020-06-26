@@ -108,3 +108,21 @@ char *nueva_etiqueta() {
 
     return final;
 }
+
+void print_index(INDEX *indice){
+    if(indice == NULL)
+        return;
+    printf("%s\n", indice->indice);
+}
+
+void print_lindex(LINDEX* lista){
+    if(lista == NULL){
+        printf("\n");
+        return;
+    }
+    INDEX *temp = lista->head;
+    while(temp != NULL){
+        print_index(temp);
+        temp = temp->next;
+    }
+}

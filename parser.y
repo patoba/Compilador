@@ -182,8 +182,8 @@ base: ENT{$$.base = getId(getGlobal(STT), "ent");}
 //Poner type, dir de num 
 //Poner type de tipo arreglo
 //creacion de tipo es posible que este mal
-tipo_arreglo: CORCH_ABRE NUM CORCH_CIERRA tipo_arreglo{
-                                                        $$.type = crear_arreglo($2.type, atoi($2.dir), $4.type);
+tipo_arreglo: tipo_arreglo CORCH_ABRE NUM CORCH_CIERRA {
+                                                        $$.type = crear_arreglo($3.type, atoi($3.dir), $1.type);
                                                       }
             | {$$.type=baseGBL;};
 
@@ -207,6 +207,11 @@ funciones: DEF tipo ID{
                             push_st(STS, init_sym_tab());
                             pushSDir(SDIR, dir);
                             dir = 0;
+                            char s[50]="";
+                            strcat(s, "$");
+                            strcat(s, $3.dir);
+                            CUAD *funcion = crear_cuadrupla("etiq", "", "", s);
+                            append_quad(code, funcion);
                             //listaRET = newListRet();
                         }else{
                             yyerror("Ya existe una funcion declarada con ese identificador");
@@ -214,7 +219,8 @@ funciones: DEF tipo ID{
                       } PAR_ABRE argumentos{//print_stack_tab_sym(STS);
                                             //print_stack_tab_type(STT);
                                             } PAR_CIERRA INICIO declaraciones sentencias{
-                                                                                        
+                                                                                        print_stack_tab_sym(STS);
+                                                                                        print_stack_tab_type(STT);
                                                                                         pop_st(STS);
                                                                                         pop_tt(STT);
                                                                                         //print_code(code);
@@ -286,13 +292,13 @@ param_arr: CORCH_ABRE CORCH_CIERRA param_arr{
 
 sentencias: sentencias sentencia{
                                     //no se
-                                    //char *L = nueva_etiqueta();
-                                    //backpatch(code, $1.nextlist, L);
-                                    //CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
-                                    //append_quad(code, etiqueta);
-
-                                    //la de abajo no va
-                                    $$.nextlist = $2.nextlist;
+                                    //if($1.nextlist!=NULL){
+                                        char *L = nueva_etiqueta();
+                                        backpatch(code, $1.nextlist, L);
+                                        CUAD *etiqueta = crear_cuadrupla("etiq", "", "", L);
+                                        append_quad(code, etiqueta);
+                                    
+                                    $$.nextlist=$1.nextlist;
                                 }
             | sentencia{//$$.nextlist = init_code();
                         $$.nextlist = $1.nextlist;
@@ -307,17 +313,25 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                 append_quad(code, etiqueta);
                                             } 
           |  SI e_bool ENTONCES sentencia SINO sentencia FIN{
-                                                                char *L1 = nueva_etiqueta();
-                                                                char *L2 = nueva_etiqueta();
-                                                                backpatch(code, $2.truelist, L1);
-                                                                backpatch(code, $2.falselist, L2);
-                                                                $$.nextlist = combinar($4.nextlist, $6.nextlist);
-                                                                CUAD *etiqueta1 = crear_cuadrupla("etiq", "", "", L1);
-                                                                CUAD *gotoo = crear_cuadrupla("goto", "", "", $4.nextlist->head->indice);
-                                                                CUAD *etiqueta2 = crear_cuadrupla("etiq", "", "", L2);
-                                                                append_quad(code, etiqueta1);
-                                                                append_quad(code, gotoo);
-                                                                append_quad(code, etiqueta2);
+                                                                
+                                                                    char *L1 = nueva_etiqueta();
+                                                                    char *L2 = nueva_etiqueta();
+                                                                    print_lindex($2.truelist);
+                                                                    print_lindex($2.falselist);
+                                                                    print_lindex($4.nextlist);
+                                                                    print_lindex($6.nextlist);
+                                                                    backpatch(code, $2.truelist, L1);
+                                                                    backpatch(code, $2.falselist, L2);
+                                                                    $$.nextlist = combinar($4.nextlist, $6.nextlist);
+                                                                    print_lindex($$.nextlist);
+                                                                    CUAD *etiqueta1 = crear_cuadrupla("etiq", "", "", L1);
+                                                                    //CUAD *gotoo = crear_cuadrupla("goto", "", "", $4.nextlist->head->indice);
+                                                                    CUAD *etiqueta2 = crear_cuadrupla("etiq", "", "", L2);
+                                                                    append_quad(code, etiqueta1);
+                                                                    //append_quad(code, gotoo);
+                                                                    append_quad(code, etiqueta2);
+                                                                
+                                                                
                                                             }
 
           | MIENTRAS e_bool HACER sentencia FIN{}
@@ -341,6 +355,7 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                             CUAD *igualar = crear_cuadrupla(":=", dir, "", $1.dir);
                                                             append_quad(code, igualar);
                                                         }
+                                                        $$.nextlist = NULL;
                                                     }else{
                                                         yyerror("No se puede realizar el cast");
                                                     }
@@ -352,7 +367,11 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
           | DEVOLVER expresion PUNTO_Y_COMA{}
           | DEVOLVER PUNTO_Y_COMA{}
           | TERMINAR PUNTO_Y_COMA{}
-          | INICIO sentencias FIN{ $$.nextlist = $2.nextlist; };
+          | INICIO sentencias FIN{  
+                                    
+                                    $$.nextlist = $2.nextlist; 
+                                    
+                                };
 
 //casos.nextlist = lista
 //casos.prueba = lista
@@ -678,7 +697,7 @@ arreglo: CORCH_ABRE expresion CORCH_CIERRA {
                                                 
                                                 if (es_arreglo(temp_type)) { 
                                                     if($2.type == getId(getGlobal(STT), "ent")) {
-                                                        if(atoi($2.dir) > 0){  //Posible falla por $2.dir es string
+                                                        if(atoi($2.dir) >= 0){  //Posible falla por $2.dir es string
                                                             int tipo_basado = temp_type->tb->tipo.tipo;
                                                             $$.type = tipo_basado;
                                                             int tam = buscar_en_pila(STT, tipo_basado)->tam;
@@ -701,7 +720,7 @@ arreglo: CORCH_ABRE expresion CORCH_CIERRA {
                                                         //$$.type = temp_type->id;
                                                         if (es_arreglo(temp_type)) {
                                                             if ($3.type == getId(getGlobal(STT), "ent")){
-                                                                if(atoi($3.dir) > 0){
+                                                                if(atoi($3.dir) >= 0){
                                                                     int typeTemp = temp_type->tb->tipo.tipo;
                                                                     $$.type = typeTemp;
                                                                     int tam = buscar_en_pila(STT, typeTemp)->tam;

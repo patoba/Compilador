@@ -15,6 +15,8 @@ typedef struct list_index {
     INDEX *tail;
 }LINDEX;
 
+void print_lindex(LINDEX*);
+void print_index(INDEX *);
 INDEX *init_index(); // Reserva memoria para un nodo índice
 void finish_index(INDEX *index); // Libera memoria de un nodo índice
 

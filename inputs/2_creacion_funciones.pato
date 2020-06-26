@@ -10,5 +10,4 @@ ent b;
 
 def sin hola(ent k, ent [][][]a) inicio
     ent s;
-    devolver;
 fin

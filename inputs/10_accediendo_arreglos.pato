@@ -1,0 +1,7 @@
+def sin prueba(sin) inicio
+    ent[2][2] a;
+    dreal b;
+    a[0][1] := 2;  
+
+    /*a[1][2] := 2;*/
+fin 

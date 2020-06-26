@@ -1,0 +1,11 @@
+def sin prueba(sin) inicio
+    ent a, b;
+    real c;
+    si 1==1 entonces 
+        inicio
+            a := 1 + 1;
+            b := a - 2;
+            c := b * a;
+        fin
+    fin
+fin

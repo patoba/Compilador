@@ -1,0 +1,7 @@
+def sin prueba(sin) inicio
+    ent a, b;
+    real c;
+    a := 1 + 1;
+    b := a - 2;
+    c := b * a;
+fin

@@ -1,0 +1,5 @@
+ent a;
+
+def sin prueba(sin) inicio
+    a := 1;
+fin

@@ -1,0 +1,17 @@
+estructura inicio
+    ent hojas;
+    dreal peso;
+fin libro;
+
+ent hola, prueba;
+dfloat [2]arr;
+ent [2][3]arr2;
+
+estructura inicio
+    ent edad;
+    dreal altura;
+    estructura inicio
+        car [30]calle;
+        car [30]colonia;
+    fin direccion;
+fin persona;
