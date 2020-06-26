@@ -57,7 +57,7 @@ char *IDGBL;
         char dir[50];
         int type;
         int base;
-        char des[50];
+        int des;
     } variable;
 
     struct {
@@ -209,8 +209,9 @@ funciones: DEF tipo ID{
                         }else{
                             yyerror("Ya existe una funcion declarada con ese identificador");
                         }
-                      } PAR_ABRE argumentos{print_stack_tab_sym(STS);
-                                            print_stack_tab_type(STT);} PAR_CIERRA INICIO declaraciones sentencias{
+                      } PAR_ABRE argumentos{//print_stack_tab_sym(STS);
+                                            //print_stack_tab_type(STT);
+                                            } PAR_CIERRA INICIO declaraciones sentencias{
                                                                                         
                                                                                         pop_st(STS);
                                                                                         pop_tt(STT);
@@ -306,16 +307,21 @@ sentencia:  SI e_bool ENTONCES sentencia %prec SIT FIN{
                                                                         
                                                                         }
           | variable ASIG expresion PUNTO_Y_COMA{
-                                                    if (es_compatible(t1, t2)){
-                                                        char *dir = reducir($3.dir, $3.type, $1.type);
+                                                    if (es_compatible($1.type, $3.type)){  //corregir
+                                                        char *dir = reducir($3.dir, $3.type, $1.type, code);
                                                         if($1.code_est){
-                                                            gen($1.base + "[" + $1.des + "]" + "=" + dir);
+                                                            char *temp;//posible falla segmnet fault
+                                                            sprintf(temp, "%d", $1.des);
+                                                            CUAD *acceder = crear_cuadrupla("[]=", temp, dir, $1.dir);
+                                                            append_quad(code, acceder);
+                                                            //gen($1.base + "[" + $1.des + "]" + "=" + dir);
                                                         }else{
-                                                            gen($1.dir + "=" + dir);
+                                                            //gen($1.dir + "=" + dir);
+                                                            CUAD *igualar = crear_cuadrupla(":=", dir, "", $1.dir);
+                                                            append_quad(code, igualar);
                                                         }
                                                     }else{
                                                         yyerror("No se puede realizar el cast");
-                                                        return NULL;
                                                     }
                                                 } 
 
@@ -460,7 +466,8 @@ expresion: expresion SUMA expresion {
 
          | PAR_ABRE expresion PAR_CIERRA {  }
 
-         | variable {}
+         | variable { $$.type = $1.type; 
+                      strcpy($$.dir, $1.dir);}
 
          | NUM { 
                     $$.type = $1.type; 
@@ -484,24 +491,27 @@ variable: ID{
                 if(buscar_en_pila_sym(STS, $1.dir) != NULL) //posible falle el compilador si la variable no existe
                     IDGBL = $1.dir;
                 else 
-                    error("El identificador no existe");
+                    yyerror("El identificador no existe");
              }variable_comp  { 
                                 if ($3.code_est) {  //peligroso
-                                    $$.dir = nueva_temporal();
-                                    $$.type = $3.type;
-                                    gen($$.dir + "=" + $1 + "(" + $3.des + ")");
-                                    $$.base = $1.dir; // ??? ENTERO = STRING
-                                    $$.code_est = true;
+                                    strcpy($$.dir, new_temporal());
+                                    $$.type = $3.type;   
+                                    char *temp;//posible falla segmnet fault
+                                    sprintf(temp, "%d", $3.des);
+                                    CUAD *acceder = crear_cuadrupla("[]", $1.dir, temp, $$.dir);
+                                    append_quad(code, acceder);
+                                    //gen($$.dir + "=" + $1 + "[" + $3.des + "]");
+                                    $$.base = atoi($1.dir); // ??? ENTERO = STRING
+                                    $$.code_est = 1;
                                     $$.des = $3.des;
                                 }else {
-                                    $$.dir = $1; // ???
-                                    $$.type = STS.get_cima().get_tipo($1);
-                                    $$.code_est = false;
+                                    strcpy($$.dir, $1.dir); // ???
+                                    $$.type = buscar_en_pila_sym(STS, $1.dir)->tipo;
+                                    $$.code_est = 0;
                                 }
                              };
 
 // VARIABLE_COMP.TYPE == ENTERO 
-// VARIABLE_COMP.DES == STRING
 // VARIABLE_COMP.CODE_EST == BOOL
 variable_comp: dato_est_sim { 
                               $$.type = $1.type; 
@@ -511,7 +521,7 @@ variable_comp: dato_est_sim {
 
              | arreglo { 
                          $$.type = $1.type;
-                         $$.des = $1.dir;
+                         $$.des = atoi($1.dir);
                          $$.code_est = 1;
                        }
 
@@ -533,29 +543,30 @@ dato_est_sim: dato_est_sim PUNTO ID {  //muy PELIGROSO
                                                 int typeTemp = s->tipo;
                                                 TYP *estTemp = search_type($1.tabla->tt_asoc, typeTemp); //aqui truena, por no copiar todo
                                                 if(estTemp == NULL)
-                                                    search_type(getGlobal(STT), typeTemp);   
+                                                    estTemp = search_type(getGlobal(STT), typeTemp);   
                                                 if (es_estructura(estTemp)) { 
                                                     $$.estructura = 1;
-                                                    $$.tabla = $$.tabla->tt_asoc->tipo.est; 
-                                                }else {
+                                                    //dato est sim.tabla.tablaTipos.getTipoBase(typeTemp).tabla
+                                                    $$.tabla = search_type($$.tabla->tt_asoc, typeTemp)->tb->tipo.est; 
+                                                }else   {
                                                     $$.estructura = 0;
                                                     $$.tabla = NULL;
-                                                    $$.type = s->id;
+                                                    $$.type = s->tipo;
                                                 }
                                                 $$.code_est = 1;
-                                            }else {
+                                            }else            {
                                                 yyerror("No existe la variable en la tabla de tipos asociada a la estructura");
                                             }
-                                        }else {
+                                        }else                                     {
                                             yyerror("La variable no pertenece a un tipo estructura");
                                         }  
                                     }
             | { 
-                SYM *typeTemp = buscar_en_pila_sym(STS, IDGBL); 
-                TYP *tipo_asoc = buscar_en_pila(STT, typeTemp->tipo);
+                SYM *symTemp = buscar_en_pila_sym(STS, IDGBL); 
+                TYP *tipo_asoc = buscar_en_pila(STT, symTemp->tipo);
                 if (es_estructura(tipo_asoc)) { 
                     $$.estructura = 1;//int
-                    $$.tabla = tipo_asoc->tipo.est; //TablaSimbolos
+                    $$.tabla = tipo_asoc->tb->tipo.est; //TablaSimbolos
                     $$.des = 0;   //direccion (entero)
                 }
                 else {
@@ -568,14 +579,15 @@ dato_est_sim: dato_est_sim PUNTO ID {  //muy PELIGROSO
 // ARREGLO.TYPE == ENTERO 
 // ARREGLO.DIR == STRING
 arreglo: CORCH_ABRE expresion CORCH_CIERRA {
-                                                TYP *temp_type = buscar_en_pila_sym(STS, IDGBL);
-                                                $$.type = temp_type->id;
+                                                TYP *temp_type = buscar_en_pila(STT, buscar_en_pila_sym(STS, IDGBL)->tipo);
+                                                
                                                 if (es_arreglo(temp_type)) { 
                                                     if($2.type == getId(getGlobal(STT), "ent")) {
                                                         if(atoi($2.dir) > 0){  //Posible falla por $2.dir es string
-                                                            int tipo_basado = temp_type->tipo.tipo;
-                                                            int tam = buscar_en_pila(STT, tipo_basado);
-                                                            $$.dir = nueva_temporal();
+                                                            int tipo_basado = temp_type->tb->tipo.tipo;
+                                                            $$.type = tipo_basado;
+                                                            int tam = buscar_en_pila(STT, tipo_basado)->tam;
+                                                            strcpy($$.dir, new_temporal());
                                                             char *tamano_en_cadena;  //posible segment fault
                                                             sprintf(tamano_en_cadena, "%d", tam);
                                                             CUAD *mult =crear_cuadrupla("*", $2.dir, tamano_en_cadena, $$.dir);
@@ -591,15 +603,16 @@ arreglo: CORCH_ABRE expresion CORCH_CIERRA {
                                                 }  
                                             }
        | arreglo CORCH_ABRE expresion CORCH_CIERRA {  
-                                                        TYP *temp_type = buscar_en_pila_sym(STS, $1.type);
-                                                        $$.type = temp_type->id;
+                                                        TYP *temp_type = buscar_en_pila(STT, $1.type);
+                                                        //$$.type = temp_type->id;
                                                         if (es_arreglo(temp_type)) {
                                                             if ($3.type == getId(getGlobal(STT), "ent")){
                                                                 if(atoi($3.dir) > 0){
-                                                                    int typeTemp = temp_type->tipo.tipo;
-                                                                    int tam = buscar_en_pila(STT, tipo_basado);
-                                                                    char *dirTemp = nueva_temporal();
-                                                                    $$.dir = nueva_temporal();
+                                                                    int typeTemp = temp_type->tb->tipo.tipo;
+                                                                    $$.type = typeTemp;
+                                                                    int tam = buscar_en_pila(STT, typeTemp)->tam;
+                                                                    char *dirTemp = new_temporal();
+                                                                    strcpy($$.dir, new_temporal());
                                                                     char *tamano_en_cadena;  //posible segment fault
                                                                     sprintf(tamano_en_cadena, "%d", tam);
                                                                     CUAD *mult =crear_cuadrupla("*", $3.dir, tamano_en_cadena, dirTemp);
@@ -607,7 +620,7 @@ arreglo: CORCH_ABRE expresion CORCH_CIERRA {
                                                                     CUAD *suma =crear_cuadrupla("+", $1.dir, dirTemp, $$.dir);
                                                                     append_quad(code, suma);
                                                                 }else{
-                                                                    yyerror("El indice debe ser mayor a cero")
+                                                                    yyerror("El indice debe ser mayor a cero");
                                                                 }
                                                             }
                                                             else {
